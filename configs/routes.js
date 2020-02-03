@@ -4,8 +4,8 @@ var routes = express.Router();
 var index = require('./../controllers/index');
 routes.use('/', index);
 
-var login = require('../controllers/login');
-routes.use('/login', login);
+var auth = require('../controllers/auth');
+routes.use('/auth', auth);
 
 var accounts = require('../controllers/account');
 routes.use('/accounts', accounts);

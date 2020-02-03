@@ -5,6 +5,7 @@ var configdev = {
         staticUrl: '',
         port: 3000,
         secretKey: 'th@sBz$90k1sWVqP',
+        refreshTokenSecret: 'IFw2Nv%XAKWKoF3H',
         proxy: ''
     },
     recaptcha: {

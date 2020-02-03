@@ -32,12 +32,12 @@ app.use(cookieParser());
 global.__base = __dirname + '/';
 
 //config && cors
-if(env != 'production'){
-  global.config = require('./configs/configdev');  
-  cors();  
+if (env != 'production') {
+  global.config = require('./configs/configdev');
+  cors();
 }
-else{  
-  global.config = require('./configs/config');  
+else {
+  global.config = require('./configs/config');
 }
 
 //cors
@@ -96,7 +96,7 @@ app.use(helmet());
 app.use(helmet.xssFilter());
 
 //fileUpload
-app.use(fileUpload({limits: { fileSize: 1 * 1024 * 1024 }})); //1MB
+app.use(fileUpload({ limits: { fileSize: 1 * 1024 * 1024 } })); //1MB
 
 //app middleware tổng của app
 var mdw_app = (function (req, res, next) {
@@ -118,6 +118,17 @@ var mdw_app = (function (req, res, next) {
 app.use(__baseUrl + '/public', express.static(path.join(__dirname, 'public')));
 app.use(__baseUrl + '/medias', express.static(path.join(__dirname, 'medias')));
 
+const logRequestStart = (req, res, next) => {
+  var nowRequest = Date.now();
+  const { method, originalUrl } = req;
+
+  res.on('finish', () => {
+    var finishRequest = Date.now();
+    console.info(`${method} ${originalUrl}: ${res.statusCode} ${res.statusMessage} ${finishRequest - nowRequest}ms`);
+  });
+  next()
+}
+app.use(logRequestStart)
 
 //route
 var indexRouter = require('./configs/routes');
