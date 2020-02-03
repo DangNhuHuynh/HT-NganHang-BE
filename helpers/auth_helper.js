@@ -7,7 +7,7 @@ var bcrypt = require('bcrypt');
  /**
  * @api {function} verify_user Get và verify thông tin user
  * @apiName verify_user
- * @apiDescription Lấy thông tin user để verify khi đăng nhập admin
+ * @apiDescription Lấy thông tin user để verify khi đăng nhập
  * @apiGroup auth_helper
  * @apiVersion 1.0.0
  * @apiParam {String} username Thông tin username.
@@ -16,18 +16,10 @@ var bcrypt = require('bcrypt');
  */
 
 auth_helper.verify_user = async function(username, password){    
-    var user = await bols.Manage_user.find_by_username(username);
+    var user = await bols.Manage_user.find_by_username('Account', username);
     if(user != null){
         const match = bcrypt.compareSync(password + config.app.secretKey, user.password);        
         if(match == true){
-            // let role = await bols.My_model.findById('Manage_role', user.id_role);
-            // if(role != null){
-            //     user.is_admin = role.is_admin; // check xem role có được vào admin không
-            // }
-            // else{
-            //     user.is_admin = 0;//không thuộc role nào
-            // }
-            
             return user;
         }
         else{

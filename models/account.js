@@ -26,12 +26,13 @@ var Account_schema = new Schema({
     },
     refresh_token: {
         type: String,
-        required: true,
+        default: '',
     },
     // 0: Inactive, 1: Active
     status: {
         type: Number,
         required: true,
+        default: 1
     },
     created: {
         type: String,

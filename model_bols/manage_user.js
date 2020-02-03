@@ -16,9 +16,10 @@ class Manage_user {
         }
     }
     
-    static async find_by_username(username) {
-        try {            
-            let user = await db.Users.findOne({ username : username});           
+    static async find_by_username(model, username) {
+        try {
+            var mySchema = 'db.' + model;
+            let user = await eval(mySchema).findOne({ username : username});           
             
             return user;
         } catch (e) {
