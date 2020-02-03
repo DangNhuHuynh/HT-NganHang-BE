@@ -60,4 +60,35 @@ account.put("/accountId", async function (req, res) {
     return null;
 });
 
+account.put("/updatePassword", async function (req, res) {
+    req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
+    req.checkBody("new_password", "Vui lòng nhập mật khẩu").notEmpty();
+
+    var errors = req.validationErrors();
+
+    if (errors) {
+        return res.json(errors);
+    } else {
+        const { username } = req.user;
+        const { password, new_password } = req.body;
+        var account = await helpers.auth_helper.verify_user(username, password);
+        if (account) {
+            var data = {
+                password: new_password,
+            };
+
+            var uPassword = await bols.My_model.update(req, 'Account', { username }, data, false);
+            if (uPassword.status == 200) {
+                return res.status(200).json({ message: 'Update password success.', data: {} });
+            } else {
+                return res.status(500).json({ message: uPassword.data, data: {} });
+            }
+        } else {
+            return res.status(400).json({ message: 'Password error.', data: req.body });
+        }
+    }
+
+    return null;
+});
+
 module.exports = account;
