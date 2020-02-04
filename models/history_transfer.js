@@ -8,8 +8,16 @@ var History_transfer_schema = new Schema({
         type: String,
         required: true,
     },
+    bank_remitter: {
+        type: String,
+        required: true,
+    },
     // Số TK người nhận
     receiver: {
+        type: String,
+        required: true,
+    },
+    bank_receiver: {
         type: String,
         required: true,
     },
@@ -23,22 +31,11 @@ var History_transfer_schema = new Schema({
         type: String,
         required: true,
     },
-    // Hình thức giao dịch: "Gửi", "Nhận", "Nhắc nợ"
-    // 0: "Gửi", 1: "Nhận", 2: "Nhắc nợ"
-    type_transfer: {
-        type: String,
-        required: true,
-    },
     // Hình thức thanh toán phí: "Gửi Trả" or "Nhận Trả"
     // 0: "Gửi Trả", 1: "Nhận Trả"
     type_settle: {
         type: Number,
         required: true,
-    },
-    banking_id: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'Link_banking',
     },
     // Chi phí giao dịch
     billing_cost: {
@@ -49,6 +46,7 @@ var History_transfer_schema = new Schema({
     status_transfer: {
         type: Number,
         required: true,
+        default: 0,
     },
     created: {
         type: String,

@@ -21,6 +21,7 @@ var Api_transfer_otp_schema = new Schema({
     status: {
         type: Number,
         required: true,
+        default: 0,
     },
     created: {
         type: String,

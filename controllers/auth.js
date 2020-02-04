@@ -23,6 +23,7 @@ auth.post('/login', async function (req, res) {
 			var claims = {
 				_id: user._id,
 				username: username,
+				name: user.name,
 				email: user.email,
 			};
 
