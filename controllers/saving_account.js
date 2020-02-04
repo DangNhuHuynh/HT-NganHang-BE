@@ -17,7 +17,7 @@ saving_account.get('/me', function (req, res, next) {
     return res.status(500).json({ message: `Account don't have saving account.`, data: {} });
 });
 
-saving_account.post('/:me', function (req, res, next) {
+saving_account.post('/', function (req, res, next) {
     const user = req.user;
     req.checkBody("deposit_money", "Tiền gửi không được trống.").notEmpty();
     req.checkBody("due", "Kỳ hạn không được trống.").notEmpty();

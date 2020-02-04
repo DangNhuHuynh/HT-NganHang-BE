@@ -7,7 +7,7 @@ var bols = require('../model_bols');
 // consumer_credit.get('/', function (req, res, next) {
 // });
 
-consumer_credit.get('/:username', function (req, res, next) {
+consumer_credit.get('/me', function (req, res, next) {
     const user = req.user;
     
     const result = await bols.My_model.findById('Consumer_credit', user._id);

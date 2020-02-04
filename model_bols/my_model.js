@@ -219,17 +219,27 @@ class My_model {
     }
 
     //object
-    static async find_first(model, where, str_fields = '', order = { createdAt: 'asc' }) {
+    static async find_first(model, where, str_fields = '', _populate = '',order = { createdAt: 'asc' }) {
         try {
             var mySchema = 'db.' + model;
 
             let items;
-            if (str_fields == '') {
-                items = await eval(mySchema).find(where).sort(order).limit(1);
+            if(_populate == '') {
+                if (str_fields == '') {
+                    items = await eval(mySchema).find(where).sort(order).limit(1);
+                }
+                else {
+                    items = await eval(mySchema).find(where, str_fields).sort(order).limit(1);
+                }
+            } else {
+                if (str_fields == '') {
+                    items = await eval(mySchema).find(where).populate(_populate).sort(order).limit(1);
+                }
+                else {
+                    items = await eval(mySchema).find(where, str_fields).populate(_populate).sort(order).limit(1);
+                }
             }
-            else {
-                items = await eval(mySchema).find(where, str_fields).sort(order).limit(1);
-            }
+            
 
             if (items.length > 0) {
                 return items[0];
