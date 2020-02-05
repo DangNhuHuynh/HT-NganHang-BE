@@ -7,7 +7,7 @@ var bols = require('../model_bols');
 // saving_account.get('/', function (req, res, next) {
 // });
 
-saving_account.get('/me', function (req, res, next) {
+saving_account.get('/me', async function (req, res, next) {
     const user = req.user;
     const result = await bols.My_model.findById('Saving_account', user._id);
     if (result) {
@@ -17,7 +17,7 @@ saving_account.get('/me', function (req, res, next) {
     return res.status(500).json({ message: `Account don't have saving account.`, data: {} });
 });
 
-saving_account.post('/', function (req, res, next) {
+saving_account.post('/', async function (req, res, next) {
     const user = req.user;
     req.checkBody("deposit_money", "Tiền gửi không được trống.").notEmpty();
     req.checkBody("due", "Kỳ hạn không được trống.").notEmpty();

@@ -631,7 +631,7 @@ helper.sendMail = function (mailOptions) {
         service: 'gmail',
         auth: {
             user: 'doduyphuong433@gmail.com',
-            pass: 'phuong828230'
+            pass: 'fhoafluiayduaitw'
         }
     });
 
