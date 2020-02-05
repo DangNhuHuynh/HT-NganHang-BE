@@ -37,6 +37,7 @@
     "nconf": "^0.10.0",
     "njwt": "^1.0.0",
     "node-cron": "^2.0.3",
+    "node-rsa": "^1.0.7",
     "nodemailer": "^6.4.2",
     "querystring": "^0.2.0",
     "redis": "^2.8.0",
