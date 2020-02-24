@@ -16,16 +16,16 @@ const NodeRSA = require('node-rsa');
  *
  */
 
-hash_helper.aes_encrypt = function(data, secretKey){
-    try{
+hash_helper.aes_encrypt = function (data, secretKey) {
+    try {
         const cipher = crypto.createCipher('aes192', secretKey);
-        var encrypted = cipher.update(data,'utf8', 'hex');
-        encrypted += cipher.final('hex');  
+        var encrypted = cipher.update(data, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
         return encrypted;
     }
-    catch(e){
+    catch (e) {
         return '';
-    }    
+    }
 }
 
 
@@ -39,14 +39,14 @@ hash_helper.aes_encrypt = function(data, secretKey){
  * @apiParam {String} secretKey Thông tin mã bí mật.
  *
  */
-hash_helper.aes_decrypt = function(data, secretKey){
-    try{
-        const decipher = crypto.createDecipher('aes192', secretKey) 
-        var decrypted = decipher.update(data,'hex','utf8') 
-        decrypted += decipher.final('utf8');         
-        return decrypted; 
+hash_helper.aes_decrypt = function (data, secretKey) {
+    try {
+        const decipher = crypto.createDecipher('aes192', secretKey)
+        var decrypted = decipher.update(data, 'hex', 'utf8')
+        decrypted += decipher.final('utf8');
+        return decrypted;
     }
-    catch(e){
+    catch (e) {
         return '';
     }
 }
@@ -60,7 +60,7 @@ hash_helper.aes_decrypt = function(data, secretKey){
  * @apiParam {String} data Thông tin cần mã hóa.
  *
  */
-hash_helper.sha256 = function(data, disgest = 'hex'){
+hash_helper.sha256 = function (data, disgest = 'hex') {
     return crypto.createHash('sha256').update(data).digest(disgest);
 }
 
@@ -73,7 +73,7 @@ hash_helper.sha256 = function(data, disgest = 'hex'){
  * @apiParam {String} data Thông tin cần mã hóa.
  *
  */
-hash_helper.md5 = function(data){
+hash_helper.md5 = function (data) {
     return crypto.createHash('md5').update(data).digest("hex");
 }
 
@@ -86,7 +86,7 @@ hash_helper.md5 = function(data){
  * @apiParam {String} data Thông tin cần mã hóa.
  *
  */
-hash_helper.sha1 = function(data){
+hash_helper.sha1 = function (data) {
     return crypto.createHash('sha1').update(data).digest("hex");
 }
 
@@ -100,7 +100,7 @@ Cex60Ul+Gv3qmSC/ckxYTISuvKdzoQq0/VkhU+gnvQ/6KI8eFND3bHXmJEA/bZ8X\n
 ZwIDAQAB\n
 -----END PUBLIC KEY-----`;
 
-var private_key =  `-----BEGIN RSA PRIVATE KEY-----\n
+var private_key = `-----BEGIN RSA PRIVATE KEY-----\n
 MIIEowIBAAKCAQEArMMafDts7eKgdMSoR/VpDeisBRCuP2KFk2PRzgXa/3IdTKya\n
 q9rfVC71p4ZDUaf1LBQMxHp8j14nKLV+OiYpBHlU/7BxyKu0hK4LcBxpGN6HyTlU\n
 v1JvAUn+JVuIuyqsa306NFhsXgVFZmu7DIjI9OAv+/fgZXp4M9iCw/60PCB5j0Ne\n
@@ -128,16 +128,20 @@ SeM7pdB/mPILt2qUMqG3C0jOSHPd7+tpRXTMIkEj6hb0BZEusXPcrU8UKVCKcWeX\n
 yDd+xQIEYWtRMsk6d3XNY95Phh+HNmtMLREKnLFT8cWXXRLrZ1QU\n
 -----END RSA PRIVATE KEY-----`;
 
-hash_helper.encryptedRSA = function(public_key, data) {
+hash_helper.encryptedRSA = function (public_key, data) {
     let key_public = new NodeRSA(public_key);
     const encryptedString = key_public.encrypt(data, 'base64');
     return encryptedString;
 }
 
-hash_helper.decrypedRSA = function(data) {
-    let key_private = new NodeRSA(private_key);
-    const decryptedString = key_private.decrypt(data, 'utf8');
-    return decryptedString;
+hash_helper.decrypedRSA = function (data) {
+    try {
+        let key_private = new NodeRSA(private_key);
+        const decryptedString = key_private.decrypt(data, 'utf8');
+        return decryptedString;
+    } catch (error) {
+        return null;
+    }
 }
 
 module.exports = hash_helper;
