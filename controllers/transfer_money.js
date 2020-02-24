@@ -34,14 +34,14 @@ transfer_money.post('/', function (req, res, next) {
             }
 
             var data = {
-                bank_receiver,
+                remitter: credit.account_number,
+                bank_remitter: 'HPK',
                 receiver,
+                bank_receiver,
                 deposit_money,
                 type_settle,
                 billing_cost,
                 description,
-                remitter: credit.account_number,
-                bank_remitter: 'HPK',
             };
 
             const createTransfer = await bols.My_model.create(req, 'History_transfer', data);
