@@ -13,7 +13,9 @@ account.get("/:username", async function (req, res) {
         const result = await bols.My_model.find('Account', { username }, 'username name phone email');
 
         if (result.length > 0) {
-            return res.status(200).json({ message: 'Find account success.', data: result[0] });
+            return res.status(200).json({ message: 'Find account success.', data: Object.assign({}, result[0], {
+                roles: ['admin'] // TODO dummy
+            }) });
         } else {
             return res.status(500).json({ message: 'Find account error.', data: req.params });
         }
@@ -60,7 +62,8 @@ account.put("/accountId", async function (req, res) {
     return null;
 });
 
-account.put("/updatePassword", async function (req, res) {
+var middleware = require('../configs/middlewware');
+account.put("/updatePassword", middleware.mdw_auth, async function (req, res) {
     req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
     req.checkBody("new_password", "Vui lòng nhập mật khẩu").notEmpty();
 
