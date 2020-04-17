@@ -62,6 +62,7 @@ account.put("/accountId", async function (req, res) {
     return null;
 });
 
+var middleware = require('../configs/middlewware');
 account.put("/updatePassword", middleware.mdw_auth, async function (req, res) {
     req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
     req.checkBody("new_password", "Vui lòng nhập mật khẩu").notEmpty();
