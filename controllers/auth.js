@@ -27,7 +27,8 @@ auth.post('/login', async function (req, res) {
 				email: user.email,
 			};
 
-			const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
+			// const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
+			const token = await helpers.helper.renderToken(tokenSecret, claims, 1);
 			const refreshToken = await helpers.helper.renderToken(refreshTokenSecret, claims, 1);
 			const updateRefreshToken = await bols.My_model.update(req, 'Account', { username: username }, { refresh_token: refreshToken });
 

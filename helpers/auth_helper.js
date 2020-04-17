@@ -15,10 +15,12 @@ var bcrypt = require('bcrypt');
  *
  */
 
-auth_helper.verify_user = async function(username, password){    
+auth_helper.verify_user = async function(username, password){
     var user = await bols.Manage_user.find_by_username('Account', username);
     if(user != null){
-        const match = bcrypt.compareSync(password + config.app.secretKey, user.password);        
+        // TODO: bcrypt
+        // const match = bcrypt.compareSync(password + config.app.secretKey, user.password);
+        const match = password === user.password
         if(match == true){
             return user;
         }
@@ -28,7 +30,11 @@ auth_helper.verify_user = async function(username, password){
     }
     else{
         return null;
-    }  
+    }
+}
+
+auth_helper.find_user_by_email = async function(email) {
+    return bols.Manage_user.find_by_email('Account', email);
 }
 
 /**
@@ -41,7 +47,7 @@ auth_helper.verify_user = async function(username, password){
  *
  */
 
-auth_helper.delete_userdata = async function(req){    
+auth_helper.delete_userdata = async function(req){
     req.session.destroy();
 }
 
@@ -67,21 +73,21 @@ auth_helper.set_local_user_data = async function(res, user_data){
  * @apiParam {Object} req Thông tin request.
  *
  */
-auth_helper.get_userdata = async function(req){    
+auth_helper.get_userdata = async function(req){
     if(req.session.userdata != null && req.session.userdata != undefined){
-        var obj = req.session.userdata;        
-        
+        var obj = req.session.userdata;
+
         if( req.session.permission != null &&  req.session.permission != undefined){
             obj.permission = req.session.permission;
-        }   
+        }
         else{
             obj.permission = null;
-        }      
+        }
         return obj;
     }
     else{
         return null;
-    }    
+    }
 }
 
 
@@ -94,14 +100,14 @@ auth_helper.get_userdata = async function(req){
  * @apiParam {Object} req Thông tin request.
  *
  */
-auth_helper.is_authenticated = async function(req){          
-    if(req.session.userdata != null && req.session.userdata != undefined ){        
+auth_helper.is_authenticated = async function(req){
+    if(req.session.userdata != null && req.session.userdata != undefined ){
         return true;
     }
     else{
         //console.log('0');
         return false;
-    }    
+    }
 }
 
 module.exports = auth_helper;

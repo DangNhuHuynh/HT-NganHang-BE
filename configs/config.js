@@ -6,7 +6,8 @@ var config = {
         port: 80,
         secretKey: 'th@sBz$90k1sWVqP',
         refreshTokenSecret: 'IFw2Nv%XAKWKoF3H',
-        proxy: ''
+        proxy: '',
+        clientUrl: 'http://localhost:9527'
     },
     recaptcha: {
         sitekey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
@@ -20,7 +21,7 @@ var config = {
         password: 'QZVANNf3WU42OPH8'
     },
     cors:{
-        whitelist : ['https://localhost:3000']
+        whitelist : ['https://localhost:3000', 'http://localhost:9527']
     }
 };
 
