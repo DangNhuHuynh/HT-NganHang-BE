@@ -10,7 +10,7 @@ var helmet = require('helmet');
 var csrf = require('csurf');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-var env = 'production';//production, dev
+var env = process.env.NODE_ENV;//production, dev
 
 var app = express();
 

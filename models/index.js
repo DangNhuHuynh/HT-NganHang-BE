@@ -3,9 +3,11 @@ var fs = require('fs');
 var path = require('path');
 var mongoose = require('mongoose');
 var db = {};
-const { db: { host, port, name, username, password} } = config; 
+const { db: { host, port, name, username, password} } = config;
 // `mongodb+srv://${username}:${password}@${host}/${name}?retryWrites=true&w=majority`;
-let connectionString = process.env.MONGODB_URI || `mongodb://${username}:${password}@${host}:${port}/${name}`;
+
+const auth = username && password ? `${username}:${password}@` : ''
+let connectionString = process.env.MONGODB_URI || `mongodb://${auth}${host}:${port}/${name}`;
 
 const options = {
     useNewUrlParser: true,
@@ -22,7 +24,7 @@ const options = {
     family: 4 // Use IPv4, skip trying IPv6
 };
 
-                            
+
 mongoose.connect(connectionString, options)
 .then(res => console.log("Connected to DB"))
 .catch(err => { // if error we will be here
@@ -39,6 +41,6 @@ fs.readdirSync(__dirname)
     var model = require(path.join(__dirname, file));
     db[model.modelName] = model;
 });
- 
+
 db.mongoose = mongoose;
 module.exports = db;

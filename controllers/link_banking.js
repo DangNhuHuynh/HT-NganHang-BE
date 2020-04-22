@@ -7,7 +7,7 @@ var bols = require('../model_bols');
 // link_banking.get('/', function (req, res, next) {
 // });
 
-link_banking.get('/', function (req, res, next) {
+link_banking.get('/', async function (req, res, next) {
     const result = await bols.My_model.find_all('Link_banking', {}, '_id name transaction_fee');
 
     return res.status(200).json({ message: 'Get list banking success.', data: result });

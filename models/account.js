@@ -12,21 +12,14 @@ var Account_schema = new Schema({
         type: String,
         required: true,
     },
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-    },
-    phone: {
-        type: String,
-        required: true,
-    },
     refresh_token: {
         type: String,
         default: '',
+    },
+    account_type: {
+        type: Number,
+        required: true,
+        default: 1
     },
     // 0: Inactive, 1: Active
     status: {
@@ -61,4 +54,4 @@ Account_schema.pre('save', function (next) {
     });
 });
 
-module.exports = mongoose.model('Account', Account_schema, "account"); // model name, schema name, collection name 
+module.exports = mongoose.model('Account', Account_schema, "account"); // model name, schema name, collection name

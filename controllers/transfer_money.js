@@ -7,7 +7,7 @@ var bols = require('../model_bols');
 // transfer_money.get('/', function (req, res, next) {
 // });
 
-transfer_money.post('/', function (req, res, next) {
+transfer_money.post('/', async function (req, res, next) {
     const user = req.user;
 
     req.checkBody("receiver", "Vui lòng nhập số tài khoản nhận.").notEmpty();
@@ -92,7 +92,7 @@ transfer_money.post('/', function (req, res, next) {
     return res.status(500).json({ message: `Account don't have consumer credit.`, data: {} });
 });
 
-transfer_money.post('/verification', function (req, res, next) {
+transfer_money.post('/verification', async function (req, res, next) {
     const user = req.user;
 
     req.checkBody("transfer_id", "Vui lòng gửi mã giao dịch.").notEmpty();
@@ -108,7 +108,7 @@ transfer_money.post('/verification', function (req, res, next) {
             const timeSubmit = Date.now();
             if (getApiOTP.expired - timeSubmit >= 0) {
                 if (getApiOTP.otp_code == otp) {
-                    
+
                     const uTransfer = await bols.My_model.update(req, 'History_transfer', { _id: transfer_id }, { status_transfer: 1 });
                     if (uTransfer.status == 200) {
                         // Cập nhật lại số dư trong tài khoản

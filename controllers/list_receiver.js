@@ -3,11 +3,7 @@ var list_receiver = express.Router();
 var db = require('../models');
 var bols = require('../model_bols');
 
-/* GET home page. */
-// list_receiver.get('/', function (req, res, next) {
-// });
-
-list_receiver.get('/me', function (req, res, next) {
+list_receiver.get('/me', async function (req, res, next) {
     const user = req.user;
 
     const result = await bols.My_model.findAll('List_receiver', { created: req.username });
@@ -19,7 +15,7 @@ list_receiver.get('/me', function (req, res, next) {
 });
 
 // Create 1 receiver.
-list_receiver.post('/', function (req, res, next) {
+list_receiver.post('/', async function (req, res, next) {
     const user = req.user;
     req.checkBody("account_number", "Số TK không được trống.").notEmpty();
     req.checkBody("banking_id", "Vui lòng chọn Banking.").notEmpty();
@@ -64,7 +60,7 @@ list_receiver.post('/', function (req, res, next) {
     }
 });
 
-list_receiver.put('/', function (req, res, next) {
+list_receiver.put('/', async function (req, res, next) {
     req.checkBody("receiver_id", "Vui lòng cung cấp receiver_id.").notEmpty();
     req.checkBody("name_reminiscent", "Vui lòng nhập tên gợi nhớ.").notEmpty();
 
@@ -82,7 +78,7 @@ list_receiver.put('/', function (req, res, next) {
     }
 });
 
-list_receiver.delete('/', function (req, res, next) {
+list_receiver.delete('/', async function (req, res, next) {
     req.checkBody("receiver_id", "Vui lòng cung cấp receiver_id.").notEmpty();
 
     var errors = req.validationErrors();
