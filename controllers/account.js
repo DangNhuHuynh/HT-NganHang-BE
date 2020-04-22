@@ -7,15 +7,23 @@ var bols = require('../model_bols');
 var middleware = require('../configs/middlewware');
 var mailjet = require('../helpers/mailjet')
 
+const ROUTES = {
+  1: 'customer',
+  2: 'employee',
+  3: 'admin'
+}
+
+
 account.get("/:username", async function (req, res) {
   const {username} = req.params;
   if (username.trim().length > 0) {
-    const result = await bols.My_model.find('Account', {username}, 'username name phone email');
+    const result = await bols.My_model.find('Account', { username }, 'username name phone email account_type');
 
     if (result.length > 0) {
+      const account = result[0]
       return res.status(200).json({
-        message: 'Find account success.', data: Object.assign({}, result[0], {
-          roles: ['admin'] // TODO dummy
+        message: 'Find account success.', data: Object.assign({}, account, {
+          roles: [ROUTES[account.account_type] || 'UNKNOWN']
         })
       });
     } else {

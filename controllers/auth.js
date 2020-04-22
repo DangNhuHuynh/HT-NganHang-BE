@@ -75,7 +75,7 @@ auth.post('/re-renderToken', async function (req, res) {
 
 			const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
 			const refreshTokenNew = await helpers.helper.renderToken(refreshTokenSecret, claims, 1);
-			var updateRefreshToken = await bols.My_model.update(req, 'Account', { username }, { refresh_token: refreshTokenNew }, false);
+			await bols.My_model.update(req, 'Account', { username }, { refresh_token: refreshTokenNew }, false);
 
 			return res.status(200).json({ message: 'Re-render token success.', data: { token } });
 		} else {
@@ -83,7 +83,7 @@ auth.post('/re-renderToken', async function (req, res) {
 		}
 
 	} catch (e) {
-		console.log(e);
+		console.log(e.message);
 		return res.status(400).json({ message: 'Invalid refreshToken. You need to login againt.' });
 	}
 });
