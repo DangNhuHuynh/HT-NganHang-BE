@@ -151,7 +151,7 @@ app.use(function (err, req, res, next) {
 });
 
 //port
-// app.listen(config.app.port);
+app.listen(config.app.port);
 
 
 module.exports = app;

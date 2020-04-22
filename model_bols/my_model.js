@@ -111,7 +111,13 @@ class My_model {
                 data.modified = 'n/a';
             }
 
-            let update = await eval(mySchema).findOneAndUpdate(where, data, { new: create_new });
+            let record = await eval(mySchema).findOne(where);
+            let update = false
+          console.log(record)
+            if (record) {
+              Object.assign(record, data)
+              update = await record.save()
+            }
 
             if (!update) {
                 return { status: 500, data: update };
@@ -239,7 +245,7 @@ class My_model {
                     items = await eval(mySchema).find(where, str_fields).populate(_populate).sort(order).limit(1);
                 }
             }
-            
+
 
             if (items.length > 0) {
                 return items[0];

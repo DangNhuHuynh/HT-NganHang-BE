@@ -4,7 +4,7 @@ var db = require('./../models');
 var bols = require('./../model_bols');
 var bcrypt = require('bcrypt');
 
- /**
+/**
  * @api {function} verify_user Get và verify thông tin user
  * @apiName verify_user
  * @apiDescription Lấy thông tin user để verify khi đăng nhập
@@ -15,26 +15,25 @@ var bcrypt = require('bcrypt');
  *
  */
 
-auth_helper.verify_user = async function(username, password){
-    var user = await bols.Manage_user.find_by_username('Account', username);
-    if(user != null){
-        // TODO: bcrypt
-        // const match = bcrypt.compareSync(password + config.app.secretKey, user.password);
-        const match = password === user.password
-        if(match == true){
-            return user;
-        }
-        else{
-            return null;
-        }
+auth_helper.verify_user = async function (username, password) {
+  var user = await bols.Manage_user.find_by_username('Account', username);
+  if (user != null) {
+    // TODO: bcrypt
+    const match = bcrypt.compareSync(password + config.app.secretKey, user.password);
+    console.log(match)
+    // const match = password === user.password
+    if (match == true) {
+      return user;
+    } else {
+      return null;
     }
-    else{
-        return null;
-    }
+  } else {
+    return null;
+  }
 }
 
-auth_helper.find_user_by_email = async function(email) {
-    return bols.Manage_user.find_by_email('Account', email);
+auth_helper.find_user_by_email = async function (email) {
+  return bols.Manage_user.find_by_email('Account', email);
 }
 
 /**
@@ -47,8 +46,8 @@ auth_helper.find_user_by_email = async function(email) {
  *
  */
 
-auth_helper.delete_userdata = async function(req){
-    req.session.destroy();
+auth_helper.delete_userdata = async function (req) {
+  req.session.destroy();
 }
 
 /**
@@ -60,8 +59,8 @@ auth_helper.delete_userdata = async function(req){
  * @apiParam {Object} res Thông tin response.
  *
  */
-auth_helper.set_local_user_data = async function(res, user_data){
-    res.locals.user_data = user_data;//set local data user
+auth_helper.set_local_user_data = async function (res, user_data) {
+  res.locals.user_data = user_data;//set local data user
 }
 
 /**
@@ -73,21 +72,19 @@ auth_helper.set_local_user_data = async function(res, user_data){
  * @apiParam {Object} req Thông tin request.
  *
  */
-auth_helper.get_userdata = async function(req){
-    if(req.session.userdata != null && req.session.userdata != undefined){
-        var obj = req.session.userdata;
+auth_helper.get_userdata = async function (req) {
+  if (req.session.userdata != null && req.session.userdata != undefined) {
+    var obj = req.session.userdata;
 
-        if( req.session.permission != null &&  req.session.permission != undefined){
-            obj.permission = req.session.permission;
-        }
-        else{
-            obj.permission = null;
-        }
-        return obj;
+    if (req.session.permission != null && req.session.permission != undefined) {
+      obj.permission = req.session.permission;
+    } else {
+      obj.permission = null;
     }
-    else{
-        return null;
-    }
+    return obj;
+  } else {
+    return null;
+  }
 }
 
 
@@ -100,14 +97,13 @@ auth_helper.get_userdata = async function(req){
  * @apiParam {Object} req Thông tin request.
  *
  */
-auth_helper.is_authenticated = async function(req){
-    if(req.session.userdata != null && req.session.userdata != undefined ){
-        return true;
-    }
-    else{
-        //console.log('0');
-        return false;
-    }
+auth_helper.is_authenticated = async function (req) {
+  if (req.session.userdata != null && req.session.userdata != undefined) {
+    return true;
+  } else {
+    //console.log('0');
+    return false;
+  }
 }
 
 module.exports = auth_helper;

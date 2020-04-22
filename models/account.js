@@ -12,6 +12,11 @@ var Account_schema = new Schema({
         type: String,
         required: true,
     },
+    email: {
+      type: String,
+      required: true,
+      default: ''
+    },
     refresh_token: {
         type: String,
         default: '',
@@ -27,16 +32,6 @@ var Account_schema = new Schema({
         required: true,
         default: 1
     },
-    created: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
-    modified: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
 },
     {
         timestamps: true //tự động thêm field createAt và updateAt
@@ -44,14 +39,19 @@ var Account_schema = new Schema({
 
 //pre hook
 Account_schema.pre('save', function (next) {
-    var user = this;
-    bcrypt.hash(user.password, 10, function (err, hash) {
-        if (err) {
-            return next(err);
-        }
-        user.password = hash;
-        next();
-    });
+  if (!this.isModified('password')) {
+    return next()
+  }
+
+  var user = this;
+  bcrypt.hash(user.password + config.app.secretKey, 10, function (err, hash) {
+      if (err) {
+          return next(err);
+      }
+      console.log(hash)
+      user.password = hash;
+      next();
+  });
 });
 
 module.exports = mongoose.model('Account', Account_schema, "account"); // model name, schema name, collection name

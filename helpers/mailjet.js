@@ -30,32 +30,40 @@ async function send(input) {
     console.log(input)
     return
   }
-  console.log('sent mail by MJ')
-  await mailjet.connect(
-    MJ_APIKEY_PUBLIC,
-    MJ_APIKEY_PRIVATE,
-  ).post('send', {
-    version: 'v3.1',
-  }).request({
-    Messages: [{
-      From: {
-        Email: input.from.email,
-        Name: input.from.name,
-      },
-      To: Array.isArray(input.to) ? input.to.map((item) => {
-        return {
-          Email: item.email,
-          Name: item.name,
-        }
-      }) : [{
-        Email: input.to.email,
-        Name: input.to.name,
+
+  console.log(input)
+  try {
+    await mailjet.connect(
+      MJ_APIKEY_PUBLIC,
+      MJ_APIKEY_PRIVATE,
+    ).post('send', {
+      version: 'v3.1',
+    }).request({
+      Messages: [{
+        From: {
+          Email: input.from.email,
+          Name: input.from.name,
+        },
+        To: Array.isArray(input.to) ? input.to.map((item) => {
+          return {
+            Email: item.email,
+            Name: item.name,
+          }
+        }) : [{
+          Email: input.to.email,
+          Name: input.to.name,
+        }],
+        Subject: input.subject,
+        TextPart: input.text,
+        HTMLPart: input.html,
       }],
-      Subject: input.subject,
-      TextPart: input.text,
-      HTMLPart: input.html,
-    }],
-  })
+    })
+    console.log('sent mail by MJ')
+    return Promise.resolve()
+  } catch (e) {
+    console.error(e.message)
+    return Promise.reject(e)
+  }
 }
 
 module.exports = {

@@ -23,8 +23,6 @@ auth.post('/login', async function (req, res) {
 			var claims = {
 				_id: user._id,
 				username: username,
-				name: user.name,
-				email: user.email,
 			};
 
 			// const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
@@ -73,7 +71,6 @@ auth.post('/re-renderToken', async function (req, res) {
 			var claims = {
 				_id: account._id,
 				username: account.username,
-				email: account.email,
 			};
 
 			const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);

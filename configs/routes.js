@@ -29,6 +29,11 @@ routes.use('/transfer_money', middleware.mdw_auth, transfer_money);
 var api_link_banking = require('../controllers/api_link_banking');
 routes.use('/api_link_banking', middleware.mdw_auth, api_link_banking);
 
+if (process.env.NODE_ENV === 'dev') {
+  var test = require('../controllers/test_controller');
+  routes.use('/test', test);
+}
+
 //error
 var handle_error = require('./../controllers/handle_error');
 routes.use('/handle-error', handle_error);
