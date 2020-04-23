@@ -20,7 +20,6 @@ auth_helper.verify_user = async function (username, password) {
   if (user != null) {
     // TODO: bcrypt
     const match = bcrypt.compareSync(password + config.app.secretKey, user.password);
-    console.log(match)
     // const match = password === user.password
     if (match == true) {
       return user;

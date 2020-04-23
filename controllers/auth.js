@@ -30,7 +30,7 @@ auth.post('/login', async function (req, res) {
 			const refreshToken = await helpers.helper.renderToken(refreshTokenSecret, claims, 1);
 			const updateRefreshToken = await bols.My_model.update(req, 'Account', { username: username }, { refresh_token: refreshToken });
 
-			return res.status(200).json({ token, refreshToken });
+			return res.status(200).json({ token, refreshToken, username });
 		} else {
 			delete (req.body.password);
 			return res.status(400).json({ message: 'Tài khoản hoặc mật khẩu chưa đúng.', data: req.body });
@@ -77,7 +77,7 @@ auth.post('/re-renderToken', async function (req, res) {
 			const refreshTokenNew = await helpers.helper.renderToken(refreshTokenSecret, claims, 1);
 			await bols.My_model.update(req, 'Account', { username }, { refresh_token: refreshTokenNew }, false);
 
-			return res.status(200).json({ message: 'Re-render token success.', data: { token } });
+			return res.status(200).json({ message: 'Re-render token success.', data: { token, username } });
 		} else {
 			return res.status(400).json({ message: `Username or refreshToken invalid.` });
 		}
