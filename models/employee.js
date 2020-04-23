@@ -6,7 +6,7 @@ var Employee_schema = new Schema({
     account_id: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'Account',
     },
     ma_nv: {
       type: String,

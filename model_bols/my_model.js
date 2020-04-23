@@ -113,7 +113,6 @@ class My_model {
 
             let record = await eval(mySchema).findOne(where);
             let update = false
-          console.log(record)
             if (record) {
               Object.assign(record, data)
               update = await record.save()
