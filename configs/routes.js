@@ -8,11 +8,11 @@ routes.use('/', index);
 var auth = require('../controllers/auth');
 routes.use('/auth', auth);
 
-var accounts = require('../controllers/account');
-routes.use('/accounts', accounts);
+var user = require('../controllers/user');
+routes.use('/user', user);
 
-var consumer_credits = require('../controllers/consumer_credit');
-routes.use('/consumer_credits', middleware.mdw_auth, consumer_credits);
+var account = require('../controllers/account');
+routes.use('/account', middleware.mdw_auth, account);
 
 var saving_accounts = require('../controllers/saving_account');
 routes.use('/saving_accounts', middleware.mdw_auth, saving_accounts);

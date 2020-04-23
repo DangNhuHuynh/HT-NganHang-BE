@@ -1,211 +1,51 @@
-var express = require("express");
-var crypto = require('crypto');
-var nJwt = require('njwt');
+var express = require('express');
 var account = express.Router();
 var db = require('../models');
 var bols = require('../model_bols');
-var middleware = require('../configs/middlewware');
-var mailjet = require('../helpers/mailjet')
+var ObjectId = require('mongoose').Types.ObjectId;
 
-const ROUTES = {
-  1: 'customer',
-  2: 'employee',
-  3: 'admin'
-}
+const PAYMENT_TYPE = 1
+const SAVING_TYPE = 2
 
+account.get('/me', async function (req, res, next) {
+  const user = req.user;
+  console.log(user)
 
-account.get("/:username", async function (req, res) {
-  const {username} = req.params;
-  if (username.trim().length > 0) {
-    const result = await bols.My_model.find('Account', { username }, 'username name phone email account_type');
+  const customer = await bols.My_model.find_first('Customer', { account_id: new ObjectId(user._id) })
 
-    if (result.length > 0) {
-      const account = result[0]
-      return res.status(200).json({
-        message: 'Find account success.', data: Object.assign({}, account, {
-          roles: [ROUTES[account.account_type] || 'UNKNOWN']
-        })
-      });
-    } else {
-      return res.status(500).json({message: 'Find account error.', data: req.params});
-    }
+  if (!customer) {
+    return res.status(500).json({ message: `Customer doesn't exists`, data: {} });
   }
 
-  return res.status(400).json({message: 'Username error.', data: req.params});
-});
+  const [payments, savings] = await Promise.all([
+    bols.My_model.find_all('PaymentAccount', { customer_id: new ObjectId(customer._id) }),
+    bols.My_model.find_all('SavingAccount', { customer_id: new ObjectId(customer._id) }),
+  ])
+  const accounts = []
 
-account.post("/", async function (req, res) {
-  req.checkBody("username", "Vui lòng nhập tài khoản").notEmpty();
-  req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
-  req.checkBody("name", "Vui lòng nhập mật khẩu").notEmpty();
-  req.checkBody("email", "Vui lòng nhập mật khẩu").notEmpty();
-  req.checkBody("phone", "Vui lòng nhập mật khẩu").notEmpty();
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    return res.json(errors);
-  } else {
-    const username = req.body.username;
-    var checkUnitUsername = await bols.My_model.find('Account', {username}, 'username status');
-    if (checkUnitUsername.length === 0) {
-      var data = req.body;
-      data.password = data.password + config.app.secretKey;
-      var createAccount = await bols.My_model.create(req, 'Account', data);
-      if (createAccount.status == 200) {
-        delete (createAccount.password);
-        return res.status(200).json({message: 'Create account success.', data: createAccount});
-      } else {
-        return res.status(500).json({message: createAccount.data, data: req.body});
-      }
-    } else {
-      // Tồn tại username
-      delete (req.body.password);
-      return res.status(400).json({message: 'Username is exist.', data: req.body});
-    }
-  }
-});
-
-account.put("/accountId", async function (req, res) {
-
-
-  return null;
-});
-
-var middleware = require('../configs/middlewware');
-account.put("/updatePassword", middleware.mdw_auth, async function (req, res) {
-  req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
-  req.checkBody("new_password", "Vui lòng nhập mật khẩu").notEmpty();
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    return res.json(errors);
-  } else {
-    const {username} = req.user;
-    const {password, new_password} = req.body;
-    var account = await helpers.auth_helper.verify_user(username, password);
-    if (account) {
-      var data = {
-        password: new_password,
-      };
-
-      var uPassword = await bols.My_model.update(req, 'Account', {username}, data, false);
-      if (uPassword.status == 200) {
-        return res.status(200).json({message: 'Update password success.', data: {}});
-      } else {
-        return res.status(500).json({message: uPassword.data, data: {}});
-      }
-    } else {
-      return res.status(400).json({message: 'Password error.', data: req.body});
-    }
-  }
-
-  return null;
-});
-
-account.post('/reset-password', async function (req, res, next) {
-  req.checkBody("email", "Vui lòng nhập email").notEmpty();
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    return res.json(errors);
-  }
-
-  // Just create hash string
-  const user = await helpers.auth_helper.find_user_by_email(req.body.email);
-  if (!user) {
-    return res.sendStatus(400)
-  }
-
-  const hashContent = `${Date.now()}`
-  const token2 = _md5(hashContent)
-  const claims = {
-    email: req.body.email,
-    token2,
-  };
-  const tokenSecret = config.app.secretKey;
-  const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 24);
-
-  // Token 1 (jwt) will be send to email, token 2 (hashed string) will be response to client
-  try {
-
-    await _sendResetPasswordMail(user, token)
-  } catch (e) {
-    return res.sendStatus(500)
-  }
-
-  res.json({
-    message: 'Reset password info',
-    data: {
-      token: hashContent,
-    }
+  payments.forEach(paymentAcc => {
+    accounts.push({
+      id: paymentAcc.id,
+      account_number: paymentAcc.account_number,
+      balance: paymentAcc.balance,
+      type: PAYMENT_TYPE,
+    })
   })
-})
 
-account.post('/reset-password/confirm', async function (req, res, next) {
-  req.checkBody("password", "Vui lòng nhập password").notEmpty();
-  req.checkBody("confirmPassword", "Vui lòng nhập lại password mới").notEmpty();
-  req.checkBody("token", "Vui lòng nhập reset password token").notEmpty();
-  req.checkBody("token2", "Vui lòng nhập reset password token 2").notEmpty();
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    return res.json(errors);
-  }
-
-  const signingKey = config.app.secretKey;
-  const token = req.body.token ? req.body.token.toString() : '';
-  var tokenBody;
-  try {
-    tokenBody = nJwt.verify(token, signingKey).body;
-  } catch (e) {
-    console.log(e);
-    return res.sendStatus(400);
-  }
-
-
-  const email = tokenBody.email;
-  // Token 1 is jwt token, token 2 is just a hashed string
-  const hashedInToken = tokenBody.token2;
-  const hashedInRequest = _md5(req.body.token2);
-
-  if (hashedInToken != hashedInRequest) {
-    return res.sendStatus(400);
-  }
-
-  // OK, update new password
-  const data = {
-    password: req.body.password,
-  };
-  const uPassword = await bols.My_model.update(req, 'Account', {email}, data, false);
-  if (uPassword.status == 200) {
-    return res.status(200).json({message: 'Update password success.', data: {}});
-  } else {
-    return res.status(500).json({message: uPassword.data, data: {}});
-  }
-})
-
-function _md5(content) {
-  return crypto.createHash('md5').update(content).digest('hex');
-}
-
-function _sendResetPasswordMail(user, token) {
-  const url = `${config.app.clientUrl}/#/reset-password?token=${token}`
-  return mailjet.send({
-    from: {
-      name: 'Info',
-      email: config.mailJet.emailToSend,
-    },
-    to: {
-      name: user.username,
-      email: user.email,
-    },
-    subject: 'Reset Password',
-    text: `Click url below to reset your password: \r\n ${url}`,
+  savings.forEach(savingAcc => {
+    accounts.push({
+      id: savingAcc.id,
+      account_number: savingAcc.account_number,
+      balance: savingAcc.saved_money,
+      type: SAVING_TYPE,
+    })
   })
-}
+
+  if (accounts.length) {
+    return res.status(200).json({ message: 'Get consumer credit success.', data: accounts });
+  }
+
+  return res.status(500).json({ message: `Account don't have consumer credit.`, data: {} });
+});
 
 module.exports = account;
