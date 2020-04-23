@@ -1,6 +1,7 @@
 var express = require("express");
 var crypto = require('crypto');
 var nJwt = require('njwt');
+var ObjectId = require('mongoose').Types.ObjectId;
 var user = express.Router();
 var db = require('../models');
 var bols = require('../model_bols');
@@ -17,7 +18,7 @@ const ROUTES = {
 user.get("/:username", async function (req, res) {
   const {username} = req.params;
   if (username.trim().length > 0) {
-    const result = await bols.My_model.find('Account', { username }, 'username name phone email account_type');
+    const result = await bols.My_model.find('Account', {username}, 'username name phone email account_type');
 
     if (result.length > 0) {
       const account = result[0]
@@ -45,34 +46,49 @@ user.post("/", async function (req, res) {
 
   if (errors) {
     return res.json(errors);
-  } else {
-    const username = req.body.username;
-    var checkUnitUsername = await bols.My_model.find('Account', {username}, 'username status');
-    if (checkUnitUsername.length === 0) {
-      var data = req.body;
-      data.password = data.password + config.app.secretKey;
-      var createAccount = await bols.My_model.create(req, 'Account', data);
-      if (createAccount.status == 200) {
-        delete (createAccount.password);
-        return res.status(200).json({message: 'Create account success.', data: createAccount});
-      } else {
-        return res.status(500).json({message: createAccount.data, data: req.body});
-      }
-    } else {
-      // Tồn tại username
-      delete (req.body.password);
-      return res.status(400).json({message: 'Username is exist.', data: req.body});
-    }
   }
+
+  const username = req.body.username;
+  var existsUser = await bols.My_model.find_first('Account', {username}, 'username status');
+  if (existsUser) {
+    // Tồn tại username
+    delete (req.body.password);
+    return res.status(400).json({message: 'Username is exist.', data: req.body});
+  }
+
+  var data = req.body;
+  var account = await bols.My_model.create(req, 'Account', data);
+
+  if (account.status != 200) {
+    return res.status(500).json({message: account.data, data: req.body});
+  }
+
+  account = account.data
+
+  var customer = await bols.My_model.create(req, 'Customer', {
+    account_id: new ObjectId(account._id),
+    name: req.body.name,
+    phone: req.body.phone,
+  });
+  var paymentAccount = await bols.My_model.create(req, 'PaymentAccount', {
+    customer_id: new ObjectId(customer.data._id),
+    account_number: await _generateAccountNumber(),
+    balance: 0,
+    status: 1,
+  });
+
+  return res.status(200).json({message: 'Create user success.', data: {
+      email: account.email,
+      username: account.username,
+      name: customer.data.name,
+      phone: customer.data.phone,
+      paymentAccount: {
+        account_number: paymentAccount.data.account_number,
+        balance: paymentAccount.data.balance,
+      }
+  }});
 });
 
-user.put("/accountId", async function (req, res) {
-
-
-  return null;
-});
-
-var middleware = require('../configs/middlewware');
 user.put("/updatePassword", middleware.mdw_auth, async function (req, res) {
   req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
   req.checkBody("new_password", "Vui lòng nhập mật khẩu").notEmpty();
@@ -206,6 +222,17 @@ function _sendResetPasswordMail(user, token) {
     subject: 'Reset Password',
     text: `Click url below to reset your password: \r\n ${url}`,
   })
+}
+
+async function _generateAccountNumber() {
+  const randomNum = Math.floor(Math.random() * 1000000); // returns a random integer from 0 to 1000000
+  const accountNumber = 1000000 + randomNum
+
+  if (await bols.My_model.find_first('PaymentAccount', { account_number: accountNumber })) {
+    return _generateAccountNumber()
+  }
+
+  return accountNumber
 }
 
 module.exports = user;

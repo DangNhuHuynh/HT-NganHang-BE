@@ -39,9 +39,11 @@ var Account_schema = new Schema({
 
 //pre hook
 Account_schema.pre('save', function (next) {
+  console.log('aaa')
   if (!this.isModified('password')) {
     return next()
   }
+  console.log('bbb')
 
   var user = this;
   bcrypt.hash(user.password + config.app.secretKey, 10, function (err, hash) {

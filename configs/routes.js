@@ -14,9 +14,6 @@ routes.use('/user', user);
 var account = require('../controllers/account');
 routes.use('/account', middleware.mdw_auth, account);
 
-var saving_accounts = require('../controllers/saving_account');
-routes.use('/saving_accounts', middleware.mdw_auth, saving_accounts);
-
 var link_banking = require('../controllers/link_banking');
 routes.use('/link_banking', middleware.mdw_auth, link_banking);
 
