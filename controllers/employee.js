@@ -43,7 +43,7 @@ employeeRouter.post('', async function (req, res, next) {
   var errors = req.validationErrors();
 
   if (errors) {
-    return res.json(errors);
+    return res.status(400).json(errors);
   }
 
   var [existsUser, existsEmployee] = await Promise.all([
@@ -80,7 +80,7 @@ employeeRouter.put('/:id', async function (req, res, next) {
   req.checkBody("email", "Vui lòng nhập email").notEmpty();
   req.checkBody("position", "Vui lòng nhập position").notEmpty();
   req.checkBody("phone", "Vui lòng nhập phone").notEmpty();
-  req.checkBody("department", "Vui lòng nhập department").notEmpty();
+  // req.checkBody("department", "Vui lòng nhập department").notEmpty();
 
   var errors = req.validationErrors();
 
