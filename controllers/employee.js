@@ -138,6 +138,7 @@ employeeRouter.get('/login-user', async function (req, res, next) {
       return {
         id: e._id,
         username: e.username,
+        email: e.email,
       }
     }) });
 });
@@ -161,11 +162,17 @@ employeeRouter.put('/login-user/:id', async function (req, res, next) {
   if (req.body.password) {
     user.password = req.body.password
   }
+  if (req.body.email) {
+    user.email = req.body.email
+  }
   await user.save()
 
   return res
     .status(200)
-    .json({ message: 'Update employee login user success.', data: {} });
+    .json({ message: 'Update employee login user success.', data: {
+        username: user.username,
+        email: user.email,
+      } });
 });
 
 employeeRouter.delete('/login-user/:id', async function (req, res, next) {
