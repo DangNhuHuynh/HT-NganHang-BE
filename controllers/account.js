@@ -9,7 +9,6 @@ const SAVING_TYPE = 2
 
 account.get('/me', async function (req, res, next) {
   const user = req.user;
-  console.log(user)
 
   const customer = await bols.My_model.find_first('Customer', { account_id: new ObjectId(user._id) })
 

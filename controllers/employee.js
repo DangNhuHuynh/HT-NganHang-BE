@@ -20,7 +20,7 @@ employeeRouter.get('', async function (req, res, next) {
       name: employee.name,
       phone: employee.phone,
       id_card: employee.id_card,
-      email: account.email,
+      email: account ? account.email : null,
       position: employee.position,
       department: employee.department,
     }
