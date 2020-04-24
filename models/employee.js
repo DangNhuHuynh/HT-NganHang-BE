@@ -5,7 +5,6 @@ var Schema = mongoose.Schema;
 var Employee_schema = new Schema({
     account_id: {
       type: Schema.Types.ObjectId,
-      required: true,
       ref: 'Account',
     },
     ma_nv: {

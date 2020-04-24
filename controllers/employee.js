@@ -129,4 +129,67 @@ employeeRouter.delete('/:id', async function (req, res, next) {
     .json({ message: 'Delete employee success.', data: {} });
 });
 
+employeeRouter.get('/login-user', async function (req, res, next) {
+  const employees = await bols.My_model.find_all('Account', { account_type: 2 })
+
+  return res
+    .status(200)
+    .json({ message: 'Get list employee login user success.', data: employees.map(e => {
+      return {
+        id: e._id,
+        username: e.username,
+      }
+    }) });
+});
+
+employeeRouter.put('/login-user/:id', async function (req, res, next) {
+  req.checkBody("username", "Vui lòng nhập tên đăng nhập").notEmpty();
+
+  const errors = req.validationErrors();
+  if (errors) {
+    return res.status(400).json(errors);
+  }
+
+  const id = req.params.id
+  const user = await bols.My_model.find_first('Account', { _id: new ObjectId(id), account_type: 2 })
+  if (!user) {
+    return res.status(400).json({message: 'Employee doesn\'n exist.', data: req.body});
+  }
+
+  user.username = req.body.username
+
+  if (req.body.password) {
+    user.password = req.body.password
+  }
+  await user.save()
+
+  return res
+    .status(200)
+    .json({ message: 'Update employee login user success.', data: {} });
+});
+
+employeeRouter.delete('/login-user/:id', async function (req, res, next) {
+  const id = req.params.id
+
+  const employee = await bols.My_model.find_first('Account', { _id: new ObjectId(id), account_type: 2 })
+  if (!employee) {
+    return res.status(400).json({message: 'Employee doesn\'n exist.', data: req.body});
+  }
+
+  const [resultUpdateEmployee, resultUpdateUser] = await Promise.all([
+    bols.My_model.update(req, 'Employee', { account_id: new ObjectId(id) }, { account_id: null }),
+    bols.My_model.delete('Account', { _id: new ObjectId(id) }),
+  ])
+
+  if (resultUpdateEmployee.status === 200 && resultUpdateUser.status === 200) {
+    return res
+      .status(200)
+      .json({ message: 'Delete employee login user success.', data: {} });
+  }
+
+  return res
+    .status(500)
+    .json({ message: 'Delete employee login user fail.', data: {} });
+});
+
 module.exports = employeeRouter;
