@@ -6,7 +6,7 @@ var Customer_schema = new Schema({
     account_id: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'Account',
     },
     name: {
       type: String,

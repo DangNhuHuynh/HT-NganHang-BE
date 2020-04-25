@@ -1,13 +1,82 @@
 var express = require('express');
-var transfer_money = express.Router();
+var transferMoneyRouter = express.Router();
 var db = require('../models');
 var bols = require('../model_bols');
+var ObjectId = require('mongoose').Types.ObjectId;
 
-/* GET home page. */
-// transfer_money.get('/', function (req, res, next) {
-// });
+transferMoneyRouter.post('/deposit', async function (req, res, next) {
+  req.checkBody("money", "Vui lòng nhập số tiền gửi.").notEmpty();
 
-transfer_money.post('/', async function (req, res, next) {
+  var errors = req.validationErrors()
+  if (!req.body.username && !req.body.account_number) {
+    errors = 'Vui lòng nhập tên đăng nhập hoặc số tài khoản'
+  }
+  if (errors) {
+    return res.status(400).json({ message: errors, data: req.body })
+  }
+
+  const account_number = req.body.account_number
+  const username = req.body.username
+  if (!account_number) {
+    const paymentAccount = await _getDefaultPaymentAccountByUsername(username)
+    paymentAccount.balance += parseInt(req.body.money) || 0
+    await paymentAccount.save()
+
+    return res.status(200).json({
+      message: 'Update balance successful',
+      data: {
+        balance: paymentAccount.balance
+      }
+    })
+  }
+
+  const [paymentAccount, savingAccount] = await Promise.all([
+    bols.My_model.find_first('PaymentAccount', { account_number }),
+    bols.My_model.find_first('SavingAccount', { account_number }),
+  ])
+
+  if (!paymentAccount && !savingAccount) {
+    return res.status(400).json({
+      message: `Banking account with number ${account_number} doesn't exists`,
+      data: {},
+    })
+  }
+
+  let account = paymentAccount || savingAccount
+  account.balance += parseInt(req.body.money) || 0
+  await account.save()
+
+  return res.status(200).json({
+    message: 'Update balance successful',
+    data: {
+      balance: account.balance
+    }
+  })
+})
+
+async function _getDefaultPaymentAccountByUsername(username) {
+  const user = await bols.My_model.find_first('Account', { username })
+  if (!user) {
+    return null
+  }
+
+  const customer = await bols.My_model.find_first('Customer', { account_id: new ObjectId(user._id) })
+  if (!customer) {
+    return null
+  }
+
+  return await bols.My_model.find_first('PaymentAccount', { customer_id: new ObjectId(customer._id) })
+}
+
+/**
+ *
+ *
+ *
+ *
+ *
+ */
+
+transferMoneyRouter.post('/', async function (req, res, next) {
     const user = req.user;
 
     req.checkBody("receiver", "Vui lòng nhập số tài khoản nhận.").notEmpty();
@@ -92,7 +161,7 @@ transfer_money.post('/', async function (req, res, next) {
     return res.status(500).json({ message: `Account don't have consumer credit.`, data: {} });
 });
 
-transfer_money.post('/verification', async function (req, res, next) {
+transferMoneyRouter.post('/verification', async function (req, res, next) {
     const user = req.user;
 
     req.checkBody("transfer_id", "Vui lòng gửi mã giao dịch.").notEmpty();
@@ -180,4 +249,4 @@ function callApiLinkBanking() {
 
 }
 
-module.exports = transfer_money;
+module.exports = transferMoneyRouter;
