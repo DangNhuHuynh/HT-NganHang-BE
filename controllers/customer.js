@@ -51,6 +51,8 @@ customerRouter.post("/", async function (req, res) {
       name: customer.data.name,
       phone: customer.data.phone,
       paymentAccount: {
+        id: paymentAccount.data._id,
+        status: paymentAccount.data.status,
         account_number: paymentAccount.data.account_number,
         balance: paymentAccount.data.balance,
       }
