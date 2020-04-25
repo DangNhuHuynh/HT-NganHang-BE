@@ -46,6 +46,8 @@ customerRouter.post("/", async function (req, res) {
   });
 
   return res.status(200).json({message: 'Create user success.', data: {
+      account_id: account._id,
+      id: customer.data._id,
       email: account.email,
       username: account.username,
       name: customer.data.name,
