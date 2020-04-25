@@ -3,6 +3,7 @@ var data_helper = express;
 var db = require('./../models');
 var bols = require('./../model_bols');
 var moment = require('moment');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 /**
  * @api {function} get_manage_role_name Lấy role name
@@ -44,8 +45,14 @@ data_helper.check_message_filter_keyword = async function(_keyword) {
     }
 }
 
-data_helper.get_all_bank_accounts = async function(customer){
-  return []
+data_helper.get_all_bank_accounts = async function(customer) {
+  const customerId = new ObjectId(customer._id)
+  const [paymentAccounts, savingAccounts] = await Promise.all([
+    bols.My_model.find_all('PaymentAccount', { customer_id: customerId  }),
+    bols.My_model.find_all('SavingAccount', { customer_id: customerId }),
+  ])
+
+  return [...paymentAccounts, ...savingAccounts]
 }
 
 module.exports = data_helper;
