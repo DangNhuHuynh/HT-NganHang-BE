@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // Define Schema
-var History_transfer_schema = new Schema({
+var TransactionHistorySchema = new Schema({
     // Số TK người chuyển
     remitter: {
         type: String,
@@ -43,24 +43,14 @@ var History_transfer_schema = new Schema({
         required: true,
     },
     //-1: Rejected(Không chấp nhận), 0: Processing(Đang xử lý), 1: Success (Thành công)
-    status_transfer: {
+    status: {
         type: Number,
         required: true,
         default: 0,
-    },
-    created: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
-    modified: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
+    }
 },
 {
     timestamps: true //tự động thêm field createAt và updateAt
 });
 
-module.exports = mongoose.model('History_transfer', History_transfer_schema, "history_transfer"); // model name, schema name, collection name 
+module.exports = mongoose.model('TransactionHistory', TransactionHistorySchema, "transaction_history"); // model name, schema name, collection name

@@ -17,16 +17,16 @@ var moment = require('moment');
 data_helper.get_manage_role_name = async function(id){
     var item = null;
     if(id != undefined){
-        item = await bols.My_model.findById('Manage_role', id);        
-    }  
+        item = await bols.My_model.findById('Manage_role', id);
+    }
 
     if(item == null){
         return '';
-    }  
+    }
     else{
         //console.log(item.name);
         return item.name;
-    }       
+    }
 }
 
 data_helper.check_message_filter_keyword = async function(_keyword) {
@@ -44,5 +44,8 @@ data_helper.check_message_filter_keyword = async function(_keyword) {
     }
 }
 
+data_helper.get_all_bank_accounts = async function(customer){
+  return []
+}
 
 module.exports = data_helper;

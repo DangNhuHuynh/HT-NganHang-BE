@@ -86,6 +86,29 @@ auth_helper.get_userdata = async function (req) {
   }
 }
 
+auth_helper.get_userinfo = async function (req) {
+  const userId = req.user.id
+  const result = {
+    user: null,
+    employee: null,
+    customer: null,
+  }
+
+  const user = await bols.My_model.find_first('Account', { _id: new ObjectId(userId) })
+  if (!user) {
+    return null
+  }
+
+  if (user.account_type === 1) {
+    result.customer = await _fetchCustomerInfo(user)
+  }
+
+  if (user.account_type === 2) {
+    result.employee = await _fetchEmployeeInfo(user)
+  }
+
+  return result
+}
 
 /**
  * @api {function} is_authenticated Check user đăng nhập
@@ -103,6 +126,14 @@ auth_helper.is_authenticated = async function (req) {
     //console.log('0');
     return false;
   }
+}
+
+async function _fetchCustomerInfo(user) {
+  return bols.My_model.find_first('Customer', { account_id: new ObjectId(user._id) })
+}
+
+async function _fetchEmployeeInfo(user) {
+  return bols.My_model.find_first('Employee', { account_id: new ObjectId(user._id) })
 }
 
 module.exports = auth_helper;
