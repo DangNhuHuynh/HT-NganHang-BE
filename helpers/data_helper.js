@@ -56,10 +56,9 @@ data_helper.get_all_bank_accounts = async function(customer) {
 }
 
 data_helper.get_bank_account = async function(accountNumber) {
-  const mongooseAccountNumber = new ObjectId(accountNumber)
   const [paymentAccount, savingAccount] = await Promise.all([
-    bols.My_model.find_first('PaymentAccount', { account_number: mongooseAccountNumber  }),
-    bols.My_model.find_first('SavingAccount', { account_number: mongooseAccountNumber }),
+    bols.My_model.find_first('PaymentAccount', { account_number: accountNumber  }),
+    bols.My_model.find_first('SavingAccount', { account_number: accountNumber }),
   ])
 
   return paymentAccount || savingAccount

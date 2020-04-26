@@ -5,7 +5,7 @@ var bols = require('../model_bols');
 var ObjectId = require('mongoose').Types.ObjectId;
 
 transaction_history_router.get('/receiver', async function (req, res, next) {
-  const account = await helpers.data_helper.get_bank_account(req.body.account_number)
+  const account = await helpers.data_helper.get_bank_account(req.query.account_number)
   if (!account) {
     return res.status(400).json({ message: 'Account doesn\'t exists', data: {} })
   }
@@ -18,7 +18,7 @@ transaction_history_router.get('/receiver', async function (req, res, next) {
 });
 
 transaction_history_router.get('/remitter', async function (req, res, next) {
-  const account = await helpers.data_helper.get_bank_account(req.body.account_number)
+  const account = await helpers.data_helper.get_bank_account(req.query.account_number)
   if (!account) {
     return res.status(400).json({ message: 'Account doesn\'t exists', data: {} })
   }
@@ -31,7 +31,7 @@ transaction_history_router.get('/remitter', async function (req, res, next) {
 });
 
 transaction_history_router.get('/me/receiver', async function (req, res, next) {
-  const { customer } = await helpers.auth_helper.get_userinfo(req.user.id)
+  const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer)
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
@@ -43,7 +43,7 @@ transaction_history_router.get('/me/receiver', async function (req, res, next) {
 
 
 transaction_history_router.get('/me/remitter', async function (req, res, next) {
-  const { customer } = await helpers.auth_helper.get_userinfo(req.user.id)
+  const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer)
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
