@@ -156,17 +156,20 @@ function _md5(content) {
 
 function _sendResetPasswordMail(user, token) {
   const url = `${config.app.clientUrl}/#/reset-password?token=${token}`
+  const text = `
+      Dear ${user.username},\n
+      You have request reset password for email: ${user.email}, click url below to reset your password: \r\n ${url}\r\n
+
+      If you did not make request, you can ignore this email.
+  `;
+
   return mailjet.send({
-    from: {
-      name: 'Info',
-      email: config.mailJet.emailToSend,
-    },
     to: {
       name: user.username,
       email: user.email,
     },
     subject: 'Reset Password',
-    text: `Click url below to reset your password: \r\n ${url}`,
+    text,
   })
 }
 

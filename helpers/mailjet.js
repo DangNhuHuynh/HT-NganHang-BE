@@ -9,10 +9,6 @@ const MJ_APIKEY_PRIVATE = config.mailJet.apiKeyPrivate
  * Send mail via Mailjet
  *  Input format:
  *    {
- *    from: {
- *        name: 'Info',
- *        email: 'info@example.com',
- *      },
  *      to: {
  *        name: 'Sample',
  *        email: 'sample@example.com',
@@ -41,8 +37,8 @@ async function send(input) {
     }).request({
       Messages: [{
         From: {
-          Email: input.from.email,
-          Name: input.from.name,
+          Email: config.mailJet.emailToSend,
+          Name: 'Info',
         },
         To: Array.isArray(input.to) ? input.to.map((item) => {
           return {

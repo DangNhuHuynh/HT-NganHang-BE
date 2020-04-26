@@ -23,6 +23,7 @@ auth.post('/login', async function (req, res) {
 			var claims = {
 				_id: user._id,
 				username: username,
+				email: user.email,
 			};
 
 			const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
@@ -45,17 +46,16 @@ auth.post('/re-renderToken', async function (req, res) {
     var verifiedJwt = nJwt.verify(refresh_token, refreshTokenSecret);
     const username = verifiedJwt.body.username;
 
-    const account = await bols.My_model.find('Account', { username: username, refresh_token: refresh_token }, 'username email');
-    if (account.length > 0) {
+    const user = await bols.My_model.find('Account', { username: username, refresh_token: refresh_token }, 'username email');
+    if (user.length > 0) {
       // Payload
       var claims = {
-        _id: account._id,
-        username: account.username,
+        _id: user._id,
+        username: user.username,
+        email: user.email,
       };
 
       const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
-      // const refreshTokenNew = await helpers.helper.renderToken(refreshTokenSecret, claims, 1);
-      // await bols.My_model.update(req, 'Account', { username }, { refresh_token: refreshTokenNew }, false);
 
       return res.status(200).json({ message: 'Re-render token success.', data: { token, username } });
     } else {

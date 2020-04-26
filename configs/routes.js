@@ -27,7 +27,8 @@ var list_receiver = require('../controllers/list_receiver');
 routes.use('/list_receiver', middleware.mdw_auth, list_receiver);
 
 var transfer_money = require('../controllers/transfer_money');
-routes.use('/transfer_money', middleware.mdw_auth, transfer_money);
+// routes.use('/transfer_money', middleware.mdw_auth, transfer_money);
+routes.use('/transfer_money', transfer_money);
 
 var transaction_history = require('../controllers/transaction_history');
 routes.use('/transaction_history', middleware.mdw_auth, transaction_history);

@@ -3,6 +3,7 @@ var auth_helper = express;
 var db = require('./../models');
 var bols = require('./../model_bols');
 var bcrypt = require('bcrypt');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 /**
  * @api {function} verify_user Get và verify thông tin user

@@ -2,11 +2,11 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // Define Schema
-var Api_transfer_otp_schema = new Schema({
-    transfer_id: {
+var TransferOtpSchema = new Schema({
+    transaction_id: {
         type: Schema.Types.ObjectId,
         required: true,
-        ref: 'History_transfer',
+        ref: 'TransactionHistory',
     },
     otp_code: {
         type: String,
@@ -23,19 +23,9 @@ var Api_transfer_otp_schema = new Schema({
         required: true,
         default: 0,
     },
-    created: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
-    modified: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
 },
 {
     timestamps: true //tự động thêm field createAt và updateAt
 });
 
-module.exports = mongoose.model('Api_transfer_otp', Api_transfer_otp_schema, "api_transfer_otp"); // model name, schema name, collection name 
+module.exports = mongoose.model('TransferOtp', TransferOtpSchema, "transfer_otp"); // model name, schema name, collection name
