@@ -36,6 +36,12 @@ var TransactionHistorySchema = new Schema({
         type: Number,
         required: true,
     },
+    // 0: "Bình thường", 1: "Thanh toán nhắc nợ"
+    transaction_type: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     // Chi phí giao dịch
     billing_cost: {
         type: String,

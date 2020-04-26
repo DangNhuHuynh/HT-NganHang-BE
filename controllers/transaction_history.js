@@ -30,6 +30,20 @@ transaction_history_router.get('/remit', async function (req, res, next) {
   return res.status(200).json({ message: 'Get history success.', data: transactions });
 });
 
+transaction_history_router.get('/debt', async function (req, res, next) {
+  const account = await helpers.data_helper.get_bank_account(req.query.account_number)
+  if (!account) {
+    return res.status(400).json({ message: 'Account doesn\'t exists', data: {} })
+  }
+
+  const transactions = await bols.My_model.find_all('TransactionHistory', {
+    remitter_account_number: account.account_number,
+    transaction_type: 1
+  });
+
+  return res.status(200).json({ message: 'Get history success.', data: transactions });
+});
+
 transaction_history_router.get('/me/receive', async function (req, res, next) {
   const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer)
