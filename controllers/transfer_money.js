@@ -76,12 +76,7 @@ async function _getDefaultPaymentAccountByUsername(username) {
  *
  */
 transferMoneyRouter.post('/transfer', async function (req, res, next) {
-  // const user = req.user; // TODO
-  const user = {
-    _id: '5ea1d50f9504abc02b3034bd',
-    username: 'bahung1221',
-    email: 'bahung1221@gmail.com',
-  }
+  const user = req.user;
 
   req.checkBody("receiver_account_number", "Vui lòng nhập số tài khoản nhận.").notEmpty();
   req.checkBody("bank_receiver", "Vui lòng nhập số tài khoản nhận.").notEmpty();
@@ -177,12 +172,7 @@ transferMoneyRouter.post('/transfer', async function (req, res, next) {
  * Verification transfer money transaction otp
  */
 transferMoneyRouter.post('/transfer/verification', async function (req, res, next) {
-  // const user = req.user; // TODO
-  const user = {
-    _id: '5ea1d50f9504abc02b3034bd',
-    username: 'bahung1221',
-    email: 'bahung1221@gmail.com',
-  }
+  const user = req.user;
 
   req.checkBody("transaction_id", "Vui lòng gửi mã giao dịch.").notEmpty();
   req.checkBody("otp", "Vui lòng nhập số OTP.").notEmpty();
