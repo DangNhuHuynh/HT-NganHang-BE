@@ -4,7 +4,7 @@ var db = require('../models');
 var bols = require('../model_bols');
 var ObjectId = require('mongoose').Types.ObjectId;
 
-transaction_history_router.get('/receiver', async function (req, res, next) {
+transaction_history_router.get('/receive', async function (req, res, next) {
   const account = await helpers.data_helper.get_bank_account(req.query.account_number)
   if (!account) {
     return res.status(400).json({ message: 'Account doesn\'t exists', data: {} })
@@ -17,7 +17,7 @@ transaction_history_router.get('/receiver', async function (req, res, next) {
   return res.status(200).json({ message: 'Get history success.', data: transactions });
 });
 
-transaction_history_router.get('/remitter', async function (req, res, next) {
+transaction_history_router.get('/remit', async function (req, res, next) {
   const account = await helpers.data_helper.get_bank_account(req.query.account_number)
   if (!account) {
     return res.status(400).json({ message: 'Account doesn\'t exists', data: {} })
@@ -30,7 +30,7 @@ transaction_history_router.get('/remitter', async function (req, res, next) {
   return res.status(200).json({ message: 'Get history success.', data: transactions });
 });
 
-transaction_history_router.get('/me/receiver', async function (req, res, next) {
+transaction_history_router.get('/me/receive', async function (req, res, next) {
   const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer)
   const accountNumberList = accounts.map(account => account.account_number)
@@ -42,7 +42,7 @@ transaction_history_router.get('/me/receiver', async function (req, res, next) {
 });
 
 
-transaction_history_router.get('/me/remitter', async function (req, res, next) {
+transaction_history_router.get('/me/remit', async function (req, res, next) {
   const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer)
   const accountNumberList = accounts.map(account => account.account_number)
