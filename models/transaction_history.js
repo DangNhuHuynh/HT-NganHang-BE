@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 // Define Schema
 var TransactionHistorySchema = new Schema({
     // Số TK người chuyển
-    remitter: {
+    remitter_account_id: {
         type: String,
         required: true,
     },
@@ -13,7 +13,7 @@ var TransactionHistorySchema = new Schema({
         required: true,
     },
     // Số TK người nhận
-    receiver: {
+    receiver_account_id: {
         type: String,
         required: true,
     },

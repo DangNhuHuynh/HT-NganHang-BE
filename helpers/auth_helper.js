@@ -86,8 +86,7 @@ auth_helper.get_userdata = async function (req) {
   }
 }
 
-auth_helper.get_userinfo = async function (req) {
-  const userId = req.user.id
+auth_helper.get_userinfo = async function (userId) {
   const result = {
     user: null,
     employee: null,
