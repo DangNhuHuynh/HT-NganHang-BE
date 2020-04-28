@@ -45,7 +45,7 @@ transaction_history_router.get('/debt', async function (req, res, next) {
 });
 
 transaction_history_router.get('/me/receive', async function (req, res, next) {
-  const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
+  const { customer } = await helpers.auth_helper.get_userinfo(req.user._id)
   const accountNumber = req.query.account_number
 
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
@@ -59,7 +59,7 @@ transaction_history_router.get('/me/receive', async function (req, res, next) {
 
 
 transaction_history_router.get('/me/remit', async function (req, res, next) {
-  const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
+  const { customer } = await helpers.auth_helper.get_userinfo(req.user._id)
   const accountNumber = req.query.account_number
 
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
@@ -72,7 +72,7 @@ transaction_history_router.get('/me/remit', async function (req, res, next) {
 });
 
 transaction_history_router.get('/me/debt', async function (req, res, next) {
-  const { customer } = await helpers.auth_helper.get_userinfo(req.query.id)
+  const { customer } = await helpers.auth_helper.get_userinfo(req.user._id)
   const accountNumber = req.query.account_number
 
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
