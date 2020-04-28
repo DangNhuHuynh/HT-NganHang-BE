@@ -45,11 +45,17 @@ data_helper.check_message_filter_keyword = async function(_keyword) {
     }
 }
 
-data_helper.get_all_bank_accounts = async function(customer) {
+data_helper.get_all_bank_accounts = async function(customer, opt = {}) {
   const customerId = new ObjectId(customer._id)
+  const condition = {
+    customer_id: customerId,
+  }
+  if (opt.accountNumber) {
+    condition.account_number = opt.accountNumber
+  }
   const [paymentAccounts, savingAccounts] = await Promise.all([
-    bols.My_model.find_all('PaymentAccount', { customer_id: customerId  }),
-    bols.My_model.find_all('SavingAccount', { customer_id: customerId }),
+    bols.My_model.find_all('PaymentAccount', condition),
+    bols.My_model.find_all('SavingAccount', condition),
   ])
 
   return [...paymentAccounts, ...savingAccounts]
