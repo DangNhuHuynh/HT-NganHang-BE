@@ -1,8 +1,6 @@
 var express = require('express');
 var transaction_history_router = express.Router();
-var db = require('../models');
 var bols = require('../model_bols');
-var ObjectId = require('mongoose').Types.ObjectId;
 
 transaction_history_router.get('/receive', async function (req, res, next) {
   const account = await helpers.data_helper.get_bank_account(req.query.account_number)
@@ -11,7 +9,8 @@ transaction_history_router.get('/receive', async function (req, res, next) {
   }
 
   const transactions = await bols.My_model.find_all('TransactionHistory', {
-    receiver_account_number: account.account_number
+    receiver_account_number: account.account_number,
+    transaction_type: 0
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });
@@ -24,7 +23,8 @@ transaction_history_router.get('/remit', async function (req, res, next) {
   }
 
   const transactions = await bols.My_model.find_all('TransactionHistory', {
-    remitter_account_number: account.account_number
+    remitter_account_number: account.account_number,
+    transaction_type: 0
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });
@@ -51,7 +51,8 @@ transaction_history_router.get('/me/receive', async function (req, res, next) {
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
-    receiver_account_number: {"$in": accountNumberList }
+    receiver_account_number: {"$in": accountNumberList },
+    transaction_type: 0
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });
@@ -65,7 +66,8 @@ transaction_history_router.get('/me/remit', async function (req, res, next) {
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
-    remitter_account_number: {"$in": accountNumberList }
+    remitter_account_number: {"$in": accountNumberList },
+    transaction_type: 0
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });
