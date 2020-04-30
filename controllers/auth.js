@@ -46,8 +46,8 @@ auth.post('/re-renderToken', async function (req, res) {
     var verifiedJwt = nJwt.verify(refresh_token, refreshTokenSecret);
     const username = verifiedJwt.body.username;
 
-    const user = await bols.My_model.find('Account', { username: username, refresh_token: refresh_token }, 'username email');
-    if (user.length > 0) {
+    const user = await bols.My_model.find_first('Account', { username: username, refresh_token: refresh_token }, 'username email');
+    if (user) {
       // Payload
       var claims = {
         _id: user._id,

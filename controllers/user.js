@@ -14,7 +14,6 @@ const ROUTES = {
   3: 'admin'
 }
 
-
 user.get("/:username", async function (req, res) {
   const {username} = req.params;
   if (username.trim().length > 0) {
@@ -171,17 +170,6 @@ function _sendResetPasswordMail(user, token) {
     subject: 'Reset Password',
     text,
   })
-}
-
-async function _generateAccountNumber() {
-  const randomNum = Math.floor(Math.random() * 1000000); // returns a random integer from 0 to 1000000
-  const accountNumber = 1000000 + randomNum
-
-  if (await bols.My_model.find_first('PaymentAccount', { account_number: accountNumber })) {
-    return _generateAccountNumber()
-  }
-
-  return accountNumber
 }
 
 module.exports = user;

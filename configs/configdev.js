@@ -26,6 +26,13 @@ var configdev = {
         apiKeyPrivate: '67486efdde1ef5af136337aedd859d2e',
         emailToSend: 'bahung1221@gmail.com',
     },
+    smtpMailer: {
+        enable: 1,
+        SMTPHost: 'smtp.gmail.com',
+        SMTPPort: 587,
+        emailToSend: 'cuonghominhhmc@gmail.com',
+        emailToSendPassword: 'abcd@1234.com',
+    },
     cors:{
         whitelist : ['https://localhost:3000']
     }

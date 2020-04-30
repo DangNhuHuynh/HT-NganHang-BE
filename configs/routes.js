@@ -32,6 +32,9 @@ routes.use('/transfer_money', middleware.mdw_auth, transfer_money);
 var transaction_history = require('../controllers/transaction_history');
 routes.use('/transaction_history', middleware.mdw_auth, transaction_history);
 
+var debt_reminder = require('../controllers/debt_reminder');
+routes.use('/debt_reminder', middleware.mdw_auth, debt_reminder);
+
 var api_link_banking = require('../controllers/api_link_banking');
 routes.use('/api_link_banking', middleware.mdw_auth, api_link_banking);
 

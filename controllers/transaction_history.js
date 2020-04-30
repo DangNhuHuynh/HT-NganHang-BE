@@ -10,6 +10,7 @@ transaction_history_router.get('/receive', async function (req, res, next) {
 
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     receiver_account_number: account.account_number,
+    status: 1,
     transaction_type: 0
   });
 
@@ -24,6 +25,7 @@ transaction_history_router.get('/remit', async function (req, res, next) {
 
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     remitter_account_number: account.account_number,
+    status: 1,
     transaction_type: 0
   });
 
@@ -38,6 +40,7 @@ transaction_history_router.get('/debt', async function (req, res, next) {
 
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     remitter_account_number: account.account_number,
+    status: 1,
     transaction_type: 1
   });
 
@@ -52,7 +55,8 @@ transaction_history_router.get('/me/receive', async function (req, res, next) {
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     receiver_account_number: {"$in": accountNumberList },
-    transaction_type: 0
+    transaction_type: 0,
+    status: 1,
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });
@@ -67,7 +71,8 @@ transaction_history_router.get('/me/remit', async function (req, res, next) {
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     remitter_account_number: {"$in": accountNumberList },
-    transaction_type: 0
+    transaction_type: 0,
+    status: 1,
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });
@@ -81,7 +86,8 @@ transaction_history_router.get('/me/debt', async function (req, res, next) {
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     remitter_account_number: {"$in": accountNumberList },
-    transaction_type: 1
+    transaction_type: 1,
+    status: 1,
   });
 
   return res.status(200).json({ message: 'Get history success.', data: transactions });

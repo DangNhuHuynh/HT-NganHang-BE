@@ -20,6 +20,19 @@ var config = {
         username: 'admin',
         password: 'QZVANNf3WU42OPH8'
     },
+    mailJet: {
+      enable: 1,
+      apiKeyPublic: '8cce441bc6c4b27d380ebe2caa1fb69e',
+      apiKeyPrivate: '67486efdde1ef5af136337aedd859d2e',
+      emailToSend: 'bahung1221@gmail.com',
+    },
+    smtpMailer: {
+      enable: 1,
+      SMTPHost: 'smtp.gmail.com',
+      SMTPPort: 587,
+      emailToSend: 'cuonghominhhmc@gmail.com',
+      emailToSendPassword: 'cuonghominhhmc@gmail.com',
+    },
     cors:{
         whitelist : ['https://localhost:3000', 'http://localhost:9527']
     }

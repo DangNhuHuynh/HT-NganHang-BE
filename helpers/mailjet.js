@@ -27,7 +27,6 @@ async function send(input) {
     return
   }
 
-  console.log(input)
   try {
     await mailjet.connect(
       MJ_APIKEY_PUBLIC,
