@@ -33,8 +33,19 @@ debtReminderRouter.get('/me', async function (req, res, next) {
   }
 
   const reminders = await bols.My_model.find_all('DebtReminder', condition);
+  const promises = reminders.map(async reminder => {
+    const [customer, debt_customer] = await Promise.all([
+      helpers.data_helper.get_customer_by_payment_account_number(reminder.account_number),
+      helpers.data_helper.get_customer_by_payment_account_number(reminder.debt_account_number)
+    ])
 
-  return res.status(200).json({ message: 'Get reminders success.', data: reminders });
+    return {
+      ...reminder.toJSON(),
+      customer_name: customer ? customer.name : null,
+      debt_customer_name: debt_customer ? debt_customer.name : null,
+    }
+  })
+  return res.status(200).json({ message: 'Get reminders success.', data: await Promise.all(promises) });
 });
 
 debtReminderRouter.post('', async function (req, res, next) {

@@ -45,6 +45,15 @@ data_helper.check_message_filter_keyword = async function(_keyword) {
     }
 }
 
+data_helper.get_customer_by_payment_account_number = async function(accountNumber) {
+  const account = await bols.My_model.find_first('PaymentAccount', {
+    account_number: accountNumber
+  })
+  return account ? bols.My_model.find_first('Customer', {
+    _id: new ObjectId(account.customer_id)
+  }) : null
+}
+
 data_helper.get_all_bank_accounts = async function(customer, opt = {}) {
   const customerId = new ObjectId(customer._id)
   const condition = {
