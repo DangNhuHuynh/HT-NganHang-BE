@@ -70,6 +70,10 @@ data_helper.get_all_bank_accounts = async function(customer, opt = {}) {
   return [...paymentAccounts, ...savingAccounts]
 }
 
+data_helper.get_payment_bank_account = async function(accountNumber) {
+  return bols.My_model.find_first('PaymentAccount', { account_number: accountNumber  })
+}
+
 data_helper.get_bank_account = async function(accountNumber) {
   const [paymentAccount, savingAccount] = await Promise.all([
     bols.My_model.find_first('PaymentAccount', { account_number: accountNumber  }),

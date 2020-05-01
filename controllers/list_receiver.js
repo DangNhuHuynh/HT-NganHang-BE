@@ -2,98 +2,75 @@ var express = require('express');
 var list_receiver = express.Router();
 var db = require('../models');
 var bols = require('../model_bols');
+var ReceiverModel = require('../models/receiver')
+var ObjectId = require('mongoose').Types.ObjectId;
 
 list_receiver.get('/me', async function (req, res, next) {
-    const user = req.user;
+  // const user = req.user;
+  const user = {
+    _id: '5ea07612559b89572411a313',
+  }
+  const {customer} = await helpers.auth_helper.get_userinfo(user._id)
+  const receivers = await ReceiverModel
+    .find({customer_id: new ObjectId(customer._id)})
 
-    const result = await bols.My_model.findAll('List_receiver', { created: req.username });
-    if (result) {
-        return res.status(200).json({ message: 'Get consumer credit success.', data: result });
+  const data = receivers.map(async receiver => {
+    const customer = await helpers.data_helper.get_customer_by_payment_account_number(receiver.account_number)
+    return {
+      ...receiver.toJSON(),
+      name: customer.name,
     }
+  })
 
-    return res.status(500).json({ message: `Account don't have consumer credit.`, data: {} });
+  return res.status(200).json({message: `Get list receiver success.`, data: await Promise.all(data)});
 });
 
 // Create 1 receiver.
 list_receiver.post('/', async function (req, res, next) {
-    const user = req.user;
-    req.checkBody("account_number", "Số TK không được trống.").notEmpty();
-    req.checkBody("banking_id", "Vui lòng chọn Banking.").notEmpty();
+  // const user = req.user;
+  const user = {
+    _id: '5ea07612559b89572411a313',
+  }
+  req.checkBody("account_number", "Số TK không được trống.").notEmpty();
+  req.checkBody("bank", "Vui lòng chọn Banking.").notEmpty();
+  req.checkBody("nickname", "Vui lòng nhập tên gợi nhớ.").notEmpty();
 
-    var errors = req.validationErrors();
-    if (errors) {
-        return res.status(400).json({ message: errors, data: req.body });
-    } else {
-        const { account_number, banking_id, name_reminiscent } = req.body;
-        if (name_reminiscent.trim().length == 0) {
-            const link_bank = await bols.My_model.findById('Link_banking', banking_id);
-            if (link_bank.name.toLowerCase() == 'hpk') {
-                const creditReceiver = await bols.My_model.find_first('Consumer_credit', { account_number }, '', 'account_id');
-                if (creditReceiver) {
-                    var data = req.body;
-                    data['name_reminiscent'] = createReceiver.account_id.name;
+  var errors = req.validationErrors();
+  if (errors) {
+    return res.status(400).json({message: errors, data: req.body});
+  }
 
-                    const createReceiver = await bols.My_model.create(req, 'List_receiver', data);
-                    if (createReceiver.status == 200) {
-                        return res.status(200).json({ message: 'Create Receiver success.', data: createReceiver.data });
-                    }
+  const {account_number, bank, nickname} = req.body
+  const [{customer}, receiverBankAccount] = await Promise.all([
+    helpers.auth_helper.get_userinfo(user._id),
+    helpers.data_helper.get_payment_bank_account(account_number),
+  ])
 
-                    return res.status(500).json({ message: 'Create Receiver fail.', data: req.body });
-                }
+  if (!receiverBankAccount) {
+    return res.status(400).json({message: `Tài khoản người nhận không tồn tại`, data: req.body});
+  }
+  const duplicateReciver = await bols.My_model.find_first('Receiver', {
+    customer_id: new ObjectId(customer._id),
+    account_number,
+  });
 
-                return res.status(400).json({ message: 'Account number not found.', data: req.body });
-            } else {
-                // Trường hợp user thuộc ngân hàng liên kết.
+  if (duplicateReciver) {
+    return res.status(400).json({message: `Người nhận đã tồn tại`, data: req.body});
+  }
 
-            }
-        } else {
-            var data = req.body;
 
-            const createReceiver = await bols.My_model.create(req, 'List_receiver', data);
-            if (createReceiver.status == 200) {
-                return res.status(200).json({ message: 'Create Receiver success.', data: createReceiver.data });
-            }
+  const data = {
+    customer_id: customer._id,
+    account_number,
+    bank,
+    nickname,
+  }
+  const receiver = await bols.My_model.create(req, 'Receiver', data);
+  if (receiver.status != 200) {
+    return res.status(400).json({message: `Tạo người nhận mới không thành công.`, data: req.body});
+  }
 
-            return res.status(500).json({ message: 'Create Receiver fail.', data: req.body });
-        }
-
-    }
-});
-
-list_receiver.put('/', async function (req, res, next) {
-    req.checkBody("receiver_id", "Vui lòng cung cấp receiver_id.").notEmpty();
-    req.checkBody("name_reminiscent", "Vui lòng nhập tên gợi nhớ.").notEmpty();
-
-    var errors = req.validationErrors();
-    if (errors) {
-        return res.status(400).json({ message: errors, data: req.body });
-    } else {
-        const { receiver_id, name_reminiscent } = req.body;
-        const createReceiver = await bols.My_model.update(req, 'List_receiver', { _id: receiver_id }, { name_reminiscent }, false);
-        if (createReceiver.status == 200) {
-            return res.status(200).json({ message: 'Update Receiver success.', data: createReceiver.data });
-        }
-
-        return res.status(500).json({ message: 'Update Receiver fail.', data: createReceiver.data });
-    }
-});
-
-list_receiver.delete('/', async function (req, res, next) {
-    req.checkBody("receiver_id", "Vui lòng cung cấp receiver_id.").notEmpty();
-
-    var errors = req.validationErrors();
-    if (errors) {
-        return res.status(400).json({ message: errors, data: req.body });
-    } else {
-        const { receiver_id } = req.body;
-
-        const deleteReceiver = await bols.My_model.delete('List_receiver', { _id: receiver_id });
-        if (deleteReceiver.status == 200) {
-            return res.status(200).json({ message: 'Delete Receiver success.', data: createReceiver.data });
-        }
-
-        return res.status(500).json({ message: 'Delete Receiver fail.', data: createReceiver.data });
-    }
+  return res.status(200).json({message: `Tạo người nhận mới thành công.`, data: receiver.data});
 });
 
 module.exports = list_receiver;

@@ -13,10 +13,6 @@ const TRANSPORTER = createTransport({
   }
 })
 
-console.log({
-  user: config.smtpMailer.emailToSend,
-  pass: config.smtpMailer.emailToSendPassword,
-})
 async function send(options) {
   if (config.smtpMailer.enable != 1) {
     // eslint-disable-next-line no-console
