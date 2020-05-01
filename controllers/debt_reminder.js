@@ -123,7 +123,8 @@ debtReminderRouter.post('/:reminder_id/pay', async function (req, res, next) {
     deposit_money: reminder.money,
     type_settle: 0, // Người gửi trả
     description: 'Pay for debt reminder #' + reminder._id,
-    transaction_type: 1, // pay for debt reminder
+    transaction_type: 1, // pay for debt reminder,
+    billing_cost: 1100, // TODO hardcode here
   })
 
   res.status(result.code).json(result.res)

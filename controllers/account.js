@@ -53,4 +53,32 @@ account.get('/me', async function (req, res, next) {
   return res.status(500).json({ message: `Account don't have consumer credit.`, data: {} });
 });
 
+
+account.get('/:account_number', async function (req, res, next) {
+  const accountNumber = req.params.account_number
+
+  const account = await bols.My_model.find_first('PaymentAccount', {
+    account_number: accountNumber
+  })
+
+  if (!account) {
+    return res.status(400).json({ message: `Account doesn't exists`, data: {} });
+  }
+
+  const customer = await bols.My_model.find_first('Customer', {
+    _id: new ObjectId(account.customer_id)
+  })
+
+  if (!account) {
+    return res.status(400).json({ message: `Customer doesn't exists`, data: {} });
+  }
+
+  return res.status(200).json({ message: 'Get account success.', data: {
+      account_number: account.account_number,
+      account_bank: 'HPK',
+      customer_name: customer.name,
+    }
+  });
+})
+
 module.exports = account;

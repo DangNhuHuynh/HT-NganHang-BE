@@ -16,8 +16,7 @@ async function newTransferRequest(req, user, input) {
     }
   }
 
-  const {receiver_account_number, bank_receiver, deposit_money, type_settle, description, transaction_type} = input;
-  const billing_cost = 1100 // TODO: get billing cost dynamic
+  const {receiver_account_number, bank_receiver, deposit_money, type_settle, description, transaction_type, billing_cost} = input;
 
   // Người gửi trả phí giao dịch
   if (type_settle == 0) {
