@@ -31,7 +31,7 @@ var DebtReminderSchema = new Schema({
         type: String,
         default: '',
     },
-    //-1: Rejected, 0: waiting for payment, 1: done
+    //0: waiting for payment, 1: done, 2: rejected
     status: {
         type: Number,
         required: true,

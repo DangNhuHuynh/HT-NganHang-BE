@@ -1,6 +1,7 @@
 const {
   createTransport
 } = require('nodemailer')
+
 const SMTP_HOST = config.smtpMailer.SMTPHost
 const SMTP_PORT = config.smtpMailer.SMTPPort
 const TRANSPORTER = createTransport({
