@@ -6,10 +6,7 @@ var ReceiverModel = require('../models/receiver')
 var ObjectId = require('mongoose').Types.ObjectId;
 
 list_receiver.get('/me', async function (req, res, next) {
-  // const user = req.user;
-  const user = {
-    _id: '5ea07612559b89572411a313',
-  }
+  const user = req.user;
   const {customer} = await helpers.auth_helper.get_userinfo(user._id)
   const receivers = await ReceiverModel
     .find({customer_id: new ObjectId(customer._id)})
@@ -27,10 +24,7 @@ list_receiver.get('/me', async function (req, res, next) {
 
 // Create 1 receiver.
 list_receiver.post('/', async function (req, res, next) {
-  // const user = req.user;
-  const user = {
-    _id: '5ea07612559b89572411a313',
-  }
+  const user = req.user;
   req.checkBody("account_number", "Số TK không được trống.").notEmpty();
   req.checkBody("bank", "Vui lòng chọn Banking.").notEmpty();
   req.checkBody("nickname", "Vui lòng nhập tên gợi nhớ.").notEmpty();

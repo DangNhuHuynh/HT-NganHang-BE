@@ -195,7 +195,9 @@ async function verificationTransferRequest(req, user, input) {
 
     return {
       code: 200,
-      res: {message: 'Giao dịch thành công.', data: {}}
+      res: {message: 'Giao dịch thành công.', data: {
+          new_balance: balance,
+      }}
     }
   }
 
