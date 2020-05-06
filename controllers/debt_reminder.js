@@ -50,7 +50,6 @@ debtReminderRouter.get('/me', async function (req, res, next) {
 
 debtReminderRouter.post('', async function (req, res, next) {
   const user = req.user;
-
   req.checkBody("debt_account_number", "Vui lòng nhập số tài khoản nhận.").notEmpty()
   // req.checkBody("debt_banking", "Vui lòng nhập số tài khoản nhận.").notEmpty()
   req.checkBody("money", "Vui lòng nhập số tiền gửi.").notEmpty()
@@ -88,14 +87,15 @@ debtReminderRouter.post('', async function (req, res, next) {
     return res.status(500).json({message: 'Tạo nhắc nợ không thành công.', data: req.body});
   }
 
-  const debUser = await getUserOfPaymentAccount(reminder.debt_account_number)
+  const reminderData = reminder.data
+  const debUser = await getUserOfPaymentAccount(reminderData.debt_account_number)
   if (!debUser) {
     await bols.My_model.delete('DebtReminder', { _id: new ObjectId(reminder._id) })
     return res.status(500).json({message: 'Receiver doesn\'t exists', data: req.body});
   }
   const text = `
     Dear ${debUser.username},\n
-    You received debt reminder ${reminder.money} VNĐ from user: ${customer.name}.
+    You received debt reminder ${reminderData.money} VNĐ from user: ${customer.name}.
 
     Why you received this email.
     Because you register email address in InternetBanking HPK.
@@ -107,14 +107,14 @@ debtReminderRouter.post('', async function (req, res, next) {
       name: debUser.username,
       email: debUser.email,
     },
-    subject: `Your received debt reminder #${reminder._id} from ${customer.name}`,
+    subject: `Your received debt reminder #${reminderData._id} from ${customer.name}`,
     text,
   }
   await helpers.smtp_mailer.send(mailOptions)
 
   return res.status(200).json({
     message: 'Tạo nhắc nợ thành công.',
-    data: reminder.data
+    data: reminderData
   });
 })
 
