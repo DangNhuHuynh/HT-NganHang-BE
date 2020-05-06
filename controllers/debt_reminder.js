@@ -88,7 +88,11 @@ debtReminderRouter.post('', async function (req, res, next) {
     return res.status(500).json({message: 'Tạo nhắc nợ không thành công.', data: req.body});
   }
 
-  const debUser = await getUserOfPaymentAccount(reminder.account_number)
+  const debUser = await getUserOfPaymentAccount(reminder.debt_account_number)
+  if (!debUser) {
+    await bols.My_model.delete('DebtReminder', { _id: new ObjectId(reminder._id) })
+    return res.status(500).json({message: 'Receiver doesn\'t exists', data: req.body});
+  }
   const text = `
     Dear ${debUser.username},\n
     You received debt reminder ${reminder.money} VNĐ from user: ${customer.name}.
@@ -334,6 +338,10 @@ debtReminderRouter.post('/:reminder_id/pay/verification', async function (req, r
 
 async function getUserOfPaymentAccount(accountNumber) {
   const customer = await helpers.data_helper.get_customer_by_payment_account_number(accountNumber)
+  if (!customer) {
+    return null
+  }
+
   return bols.My_model.find_first('Account', {
     _id: new ObjectId(customer.account_id)
   })
