@@ -88,6 +88,26 @@ debtReminderRouter.post('', async function (req, res, next) {
     return res.status(500).json({message: 'Tạo nhắc nợ không thành công.', data: req.body});
   }
 
+  const debUser = await getUserOfPaymentAccount(reminder.account_number)
+  const text = `
+    Dear ${debUser.username},\n
+    You received debt reminder ${reminder.money} VNĐ from user: ${customer.name}.
+
+    Why you received this email.
+    Because you register email address in InternetBanking HPK.
+    If you did not make request, you can ignore this email.
+  `;
+
+  const mailOptions = {
+    to: {
+      name: debUser.username,
+      email: debUser.email,
+    },
+    subject: `Your received debt reminder #${reminder._id} from ${customer.name}`,
+    text,
+  }
+  await helpers.smtp_mailer.send(mailOptions)
+
   return res.status(200).json({
     message: 'Tạo nhắc nợ thành công.',
     data: reminder.data
@@ -95,10 +115,11 @@ debtReminderRouter.post('', async function (req, res, next) {
 })
 
 debtReminderRouter.put('/:id', async function (req, res, next) {
-  // req.checkBody("debt_account_number", "Vui lòng nhập số tài khoản nhận.").notEmpty()
-  // req.checkBody("debt_banking", "Vui lòng nhập số tài khoản nhận.").notEmpty()
-  req.checkBody("money", "Vui lòng nhập số tiền gửi.").notEmpty()
+  const user = req.user;
+
+  // req.checkBody("money", "Vui lòng nhập số tiền gửi.").notEmpty()
   req.checkBody("description", "Vui lòng chọn Banking.").notEmpty()
+  req.checkBody("status", "Vui lòng chọn status mới.").notEmpty()
 
   var errors = req.validationErrors();
   if (errors) {
@@ -109,15 +130,66 @@ debtReminderRouter.put('/:id', async function (req, res, next) {
     _id: new ObjectId(req.params.id)
   })
 
-  if (!debtReminder) {
+  const { customer } = await helpers.auth_helper.get_userinfo(user._id)
+  const paymentAccount = await bols.My_model.find_first('PaymentAccount', {
+    account_number: debtReminder.debt_account_number,
+  });
+  if (!debtReminder || !customer || !paymentAccount) {
     return res.status(400).json({message: 'Reminder doesn\'t exists', data: req.body});
   }
 
-  const {money, description} = req.body
-  debtReminder.money = money
+  const {status, description} = req.body
+  debtReminder.status = status
   debtReminder.description = description
 
   await debtReminder.save()
+
+  if (status == 2) {
+    let mailOptions
+
+    // Người bị nhắc nợ là user đang login, gửi notify tới người chủ nợ
+    if (paymentAccount.customer_id === customer._id) {
+      const user = await getUserOfPaymentAccount(debtReminder.account_number)
+      const text = `
+        Dear ${user.username},\n
+        Your debt reminder #${debtReminder._id} has been deleted by target user: ${customer.name}.
+
+        Why you received this email.
+        Because you register email address in InternetBanking HPK.
+        If you did not make request, you can ignore this email.
+      `;
+
+      mailOptions = {
+        to: {
+          name: user.username,
+          email: user.email,
+        },
+        subject: `Your debt reminder #${debtReminder._id} has been deleted`,
+        text,
+      }
+    } else {
+      const user = await getUserOfPaymentAccount(debtReminder.debt_account_number)
+      const text = `
+        Dear ${user.username},\n
+        Your debt reminder #${debtReminder._id} has been deleted by creditor: ${customer.name}.
+
+        Why you received this email.
+        Because you register email address in InternetBanking HPK.
+        If you did not make request, you can ignore this email.
+      `;
+
+      mailOptions = {
+        to: {
+          name: user.username,
+          email: user.email,
+        },
+        subject: `Your debt reminder #${debtReminder._id} has been deleted`,
+        text,
+      }
+    }
+
+    await helpers.smtp_mailer.send(mailOptions)
+  }
 
   return res.status(200).json({
     message: 'Cập nhật nhắc nợ thành công.',
@@ -125,75 +197,75 @@ debtReminderRouter.put('/:id', async function (req, res, next) {
   });
 })
 
-debtReminderRouter.delete('/:id', async function (req, res, next) {
-  const user = req.user;
-
-  const id = new ObjectId(req.params.id)
-  const debtReminder = await bols.My_model.find_first('DebtReminder', {
-    _id: id
-  })
-  const { customer } = await helpers.auth_helper.get_userinfo(user._id)
-  const paymentAccount = await bols.My_model.find_first('PaymentAccount', {
-    account_number: debtReminder.debt_account_number,
-  });
-
-  if (!debtReminder || !customer || !paymentAccount) {
-    return res.status(400).json({message: 'Reminder doesn\'t exists', data: req.body});
-  }
-
-  debtReminder.status = 2
-  await debtReminder.save()
-
-  let mailOptions = {}
-
-  // Người bị nhắc nợ là user đang login, gửi notify tới người chủ nợ
-  if (paymentAccount.customer_id === customer._id) {
-    const user = await getUserOfPaymentAccount(debtReminder.account_number)
-    const text = `
-    Dear ${user.username},\n
-    Your debt reminder #${debtReminder._id} has been deleted by target user: ${customer.name}.
-
-    Why you received this email.
-    Because you register email address in InternetBanking HPK.
-    If you did not make request, you can ignore this email.
-  `;
-
-    mailOptions = {
-      to: {
-        name: user.username,
-        email: user.email,
-      },
-      subject: `Your debt reminder #${debtReminder._id} has been deleted`,
-      text,
-    }
-  } else {
-    const user = await getUserOfPaymentAccount(debtReminder.debt_account_number)
-    const text = `
-    Dear ${user.username},\n
-    Your debt reminder #${debtReminder._id} has been deleted by creditor: ${customer.name}.
-
-    Why you received this email.
-    Because you register email address in InternetBanking HPK.
-    If you did not make request, you can ignore this email.
-  `;
-
-    mailOptions = {
-      to: {
-        name: user.username,
-        email: user.email,
-      },
-      subject: `Your debt reminder #${debtReminder._id} has been deleted`,
-      text,
-    }
-  }
-
-  await helpers.smtp_mailer.send(mailOptions)
-
-  return res.status(200).json({
-    message: 'Xoá nhắc nợ thành công.',
-    data: debtReminder.toJSON(),
-  });
-})
+// debtReminderRouter.delete('/:id', async function (req, res, next) {
+//   const user = req.user;
+//
+//   const id = new ObjectId(req.params.id)
+//   const debtReminder = await bols.My_model.find_first('DebtReminder', {
+//     _id: id
+//   })
+//   const { customer } = await helpers.auth_helper.get_userinfo(user._id)
+//   const paymentAccount = await bols.My_model.find_first('PaymentAccount', {
+//     account_number: debtReminder.debt_account_number,
+//   });
+//
+//   if (!debtReminder || !customer || !paymentAccount) {
+//     return res.status(400).json({message: 'Reminder doesn\'t exists', data: req.body});
+//   }
+//
+//   debtReminder.status = 2
+//   await debtReminder.save()
+//
+//   let mailOptions = {}
+//
+//   // Người bị nhắc nợ là user đang login, gửi notify tới người chủ nợ
+//   if (paymentAccount.customer_id === customer._id) {
+//     const user = await getUserOfPaymentAccount(debtReminder.account_number)
+//     const text = `
+//     Dear ${user.username},\n
+//     Your debt reminder #${debtReminder._id} has been deleted by target user: ${customer.name}.
+//
+//     Why you received this email.
+//     Because you register email address in InternetBanking HPK.
+//     If you did not make request, you can ignore this email.
+//   `;
+//
+//     mailOptions = {
+//       to: {
+//         name: user.username,
+//         email: user.email,
+//       },
+//       subject: `Your debt reminder #${debtReminder._id} has been deleted`,
+//       text,
+//     }
+//   } else {
+//     const user = await getUserOfPaymentAccount(debtReminder.debt_account_number)
+//     const text = `
+//     Dear ${user.username},\n
+//     Your debt reminder #${debtReminder._id} has been deleted by creditor: ${customer.name}.
+//
+//     Why you received this email.
+//     Because you register email address in InternetBanking HPK.
+//     If you did not make request, you can ignore this email.
+//   `;
+//
+//     mailOptions = {
+//       to: {
+//         name: user.username,
+//         email: user.email,
+//       },
+//       subject: `Your debt reminder #${debtReminder._id} has been deleted`,
+//       text,
+//     }
+//   }
+//
+//   await helpers.smtp_mailer.send(mailOptions)
+//
+//   return res.status(200).json({
+//     message: 'Xoá nhắc nợ thành công.',
+//     data: debtReminder.toJSON(),
+//   });
+// })
 
 /**
  * Pay for a reminder
