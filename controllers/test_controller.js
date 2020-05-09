@@ -1,27 +1,30 @@
-var express = require("express");
-var test_controller = express.Router();
-var bols = require('../model_bols');
+const express = require("express");
+const { readFileSync } = require('fs')
+const path = require('path')
+const test_controller = express.Router();
+const rsaService = require('../services/crypto/rsa')
+const hmacService = require('../services/crypto/hmac')
+
+const publicKey = ''
+const encoding = 'utf8'
 
 test_controller.post('', async function (req, res, next) {
-  req.checkBody("email", "Vui lòng nhập lại email mới").notEmpty();
-  req.checkBody("password", "Vui lòng nhập password").notEmpty();
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    return res.json(errors);
-  }
-
-  // OK, update new password
-  const data = {
-    password: req.body.password,
-  };
-  const uPassword = await bols.My_model.update(req, 'Account', { email: req.body.email }, data, false);
-  if (uPassword.status == 200) {
-    return res.status(200).json({message: 'Update password success.', data: {}});
-  } else {
-    return res.status(500).json({message: uPassword.data, data: {}});
-  }
+  rsaService.generateKeyPair()
+  // const privateKeyPath = path.resolve('private.pem')
+  // const privateKeyString = readFileSync(privateKeyPath, encoding)
+  //
+  // const data = JSON.stringify({
+  //   ts: Date.now(),
+  //   username: 'bahung1221',
+  // })
+  // const sign = rsaService.sign(data, privateKeyString)
+  // const hash = hmacService.hash(data)
+  return res.status(200).json({message: 'Generate sucessful.', data: {
+    // sign,
+    // verify: rsaService.verify(data, sign),
+    // hash,
+    // verifyHash: hmacService.verifyHash(hash, hmacService.hash(data))
+  }});
 })
 
 module.exports = test_controller;

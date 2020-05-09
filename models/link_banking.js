@@ -2,23 +2,22 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // Define Schema
-var Link_banking_schema = new Schema({
+var LinkBankingSchema = new Schema({
     name: {
         type: String,
         required: true,
-        lowercase: true,
     },
-    transction_fee: {
-        type: String,
-        required: true,
+    partnerId: {
+      type: String,
+      required: true,
     },
-    // Key public
+    // Private Key (using to create sign)
     publicKey: {
         type: String,
-        required: true,
+        default: ''
     },
-    // Key private
-    privateKey: {
+    // Secret key (using to hash content)
+    secretKey: {
         type: String,
         default: ''
     },
@@ -27,19 +26,9 @@ var Link_banking_schema = new Schema({
         type: Number,
         required: true,
     },
-    created: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
-    modified: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
 },
 {
     timestamps: true //tự động thêm field createAt và updateAt
 });
 
-module.exports = mongoose.model('Link_banking', Link_banking_schema, "link_banking"); // model name, schema name, collection name 
+module.exports = mongoose.model('LinkBanking', LinkBankingSchema, "link_banking"); // model name, schema name, collection name

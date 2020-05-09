@@ -34,7 +34,7 @@ user.get("/:username", async function (req, res) {
   return res.status(400).json({message: 'Username error.', data: req.params});
 });
 
-user.put("/updatePassword", middleware.mdw_auth, async function (req, res) {
+user.put("/updatePassword", middleware.mdwAuth, async function (req, res) {
   req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
   req.checkBody("new_password", "Vui lòng nhập mật khẩu").notEmpty();
 
