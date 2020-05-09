@@ -5,8 +5,8 @@ var bols = require('./../model_bols');
 
 handle.get('/error/:code', function(req, res, next) {
     if(req.params.code == 404){
-        res.render('errors/404');
-    }  
+        res.sendStatus(404);
+    }
 });
 
 

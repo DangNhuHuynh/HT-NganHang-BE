@@ -25,6 +25,7 @@ var LinkBankingSchema = new Schema({
     status: {
         type: Number,
         required: true,
+        default: 1,
     },
 },
 {

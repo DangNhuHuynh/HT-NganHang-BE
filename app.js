@@ -5,7 +5,6 @@ const session = require('express-session')
 const validator = require('express-validator')
 const helmet = require('helmet')
 const cors = require('cors')
-const fileUpload = require('express-fileupload')
 const env = process.env.NODE_ENV//production, dev
 
 const app = express()
@@ -83,9 +82,6 @@ app.use(validator())
 app.use(helmet())
 app.use(helmet.xssFilter())
 
-//fileUpload
-app.use(fileUpload({ limits: { fileSize: 1 * 1024 * 1024 } })) //1MB
-
 //app middleware tổng của app
 var mdw_app = (function (req, res, next) {
   app.locals.scriptGlobal = '<script>var baseUrl="' + __baseUrl + '"var staticUrl="' + __staticUrl + '"</script>'
@@ -135,7 +131,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500)
-  res.render('error')
+  res.json(err)
 })
 
 //port

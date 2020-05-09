@@ -50,7 +50,7 @@ async function linkApiVerifyWithHash(req, res, next) {
     })
   }
 
-  const reHash = hmacService.hash(data, linkBanking.secretKey)
+  const reHash = hmacService.hash(JSON.stringify(data), linkBanking.secretKey)
   if (!hmacService.verifyHash(hash, reHash)) {
     return res.status(400).json({
       errorCode: 10002,
@@ -83,7 +83,7 @@ function _verifyTimestamp(data, now) {
   const recvWindow = data.recvWindow || 3000
   const ts = data.ts || 0
 
-  return now - ts > recvWindow
+  return now - ts <= recvWindow
 }
 
 module.exports = {

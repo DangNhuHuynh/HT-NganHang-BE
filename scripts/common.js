@@ -4,7 +4,7 @@ const path = require('path')
 const http = require('../helpers/http')
 
 const BASE_URL = 'http://localhost:3001/link-api/'
-const PARTNER_ID = '001002'
+const PARTNER_ID = '842694'
 const SECRET_RSA = 'BBScu7FuuFFY3AHKaJzLF3bb'
 const SECRET_HMAC = 'BBvs4KZJFQMK22tvTvLPhT7K'
 

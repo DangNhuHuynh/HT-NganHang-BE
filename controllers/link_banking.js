@@ -1,28 +1,71 @@
-var express = require('express')
-var link_banking = express.Router()
-var bols = require('../model_bols')
+const express = require('express')
+const multer = require('multer')
+const path = require('path')
+const mkdirp = require('mkdirp')
+const link_banking = express.Router()
+const bols = require('../model_bols')
 
+/**
+ * Multer config for using disk storage instead memory storage (ram)
+ * Use disk storage because we need to storage a lot of large file, so memory storage  can't be enough capacity
+ */
+const diskStorage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    mkdirp.sync('./tmp/uploads')
+    cb(null, './tmp/uploads')
+  },
+  filename: function(req, file, cb) {
+    const tmpFileName = file.fieldname + '-' + Date.now()
+    req._tmpFilePath = path.join(__dirname, '../tmp/uploads', tmpFileName)
+    cb(null, tmpFileName)
+  }
+})
+
+const upload = multer({ storage: diskStorage })
+
+/**
+ * Get list linked banks
+ */
 link_banking.get('', async function (req, res, next) {
   const result = await bols.My_model.find_all('LinkBanking', {}, '_id name')
 
   return res.status(200).json({message: 'Get list banking success.', data: result})
 })
 
-link_banking.post('', async function (req, res, next) {
+/**
+ * Link new bank
+ */
+link_banking.post('', upload.single('file'), async function (req, res, next) {
+  req.on('aborted', function() {
+    if (req._tmpFilePath) {
+      helpers.file_helper.deleteFile(req._tmpFilePath)
+    }
+  })
+
   req.checkBody("name", "Vui lòng nhập tên ngân hàng liên kết.").notEmpty()
-  req.checkBody("publicKey", "Vui lòng nhập public key.").notEmpty()
   req.checkBody("secretKey", "Vui lòng nhập secret key.").notEmpty()
 
-  var errors = req.validationErrors()
+  const errors = req.validationErrors()
   if (errors) {
     return res.status(400).json({message: errors, data: req.body})
   }
-  const {name, publicKey, secretKey} = req.body
-  const result = await bols.My_model.create('LinkBanking', {
+
+  const publicKeyFile = req.file
+  if (!publicKeyFile) {
+    return res.status(400).json({message: 'Vui lòng upload public key file.', data: {}})
+  }
+
+  const { name, secretKey } = req.body
+  const partnerId = _generatePartnerId()
+  const publicKeyStoreName = `${partnerId}-public.pem`
+
+  await helpers.file_helper.storeFile(publicKeyStoreName, publicKeyFile.path)
+
+  const result = await bols.My_model.create(req, 'LinkBanking', {
     name,
-    publicKey,
+    publicKey: publicKeyStoreName,
     secretKey,
-    partnerId: _generatePartnerId()
+    partnerId,
   })
   if (result.status != 200) {
     return res.status(500).json({message: 'Create link banking fail.', data: {}})
