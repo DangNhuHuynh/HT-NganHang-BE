@@ -1,6 +1,5 @@
 var express = require('express');
 var validation_helper = express;
-var request = require('request');
 var path = require('path');
 
 validation_helper.is_phone = function(data){

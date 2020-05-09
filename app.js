@@ -1,23 +1,14 @@
 const express = require('express')
-const createError = require('http-errors')
 const path = require('path')
 const cookieParser = require('cookie-parser')
-const logger = require('morgan')
 const session = require('express-session')
-const flash = require('express-flash')
 const validator = require('express-validator')
 const helmet = require('helmet')
-const csrf = require('csurf')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
 const env = process.env.NODE_ENV//production, dev
 
 const app = express()
-
-// view engine setup
-app.engine('ejs', require('ejs-locals'))
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
 
 app.use(express.json({
   limit: '30mb'
@@ -84,9 +75,6 @@ app.use(session({
     maxAge: 3600000
   } //60 phút
 }))
-
-//flash
-app.use(flash())
 
 //validator
 app.use(validator())
