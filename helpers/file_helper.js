@@ -1,6 +1,14 @@
 const path = require('path')
 const fs = require('fs')
 
+async function exist(filePath) {
+  return new Promise(function(resolve) {
+    fs.access(filePath, fs.F_OK, function(err) {
+      err ? resolve(false) : resolve(true)
+    })
+  })
+}
+
 /**
  * Delete file by given path
  * @param {string} filePath
@@ -78,6 +86,7 @@ function copyFile(tmpFilePath, filePath) {
 }
 
 module.exports = {
+  exist,
   deleteFile,
   storeFile,
   copyFile,

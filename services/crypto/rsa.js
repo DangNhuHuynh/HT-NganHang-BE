@@ -27,8 +27,10 @@ function _getPrivateKeyObject() {
   return crypto.createPrivateKey({...privateKeyOption, key: privateKeyString})
 }
 
-function _getPublicKeyObject(publicKeyString) {
-  return crypto.createPublicKey({...publicKeyOption, key: publicKeyString})
+function _getPublicKeyObject(publicKeyPath) {
+  const publicKeyString = readFileSync(publicKeyPath, encoding)
+
+  return crypto.createPublicKey({...publicKeyOption, key: publicKeyString })
 }
 
 module.exports = {
@@ -49,11 +51,13 @@ module.exports = {
     }
     return crypto.sign(algorithm, buffer, _getPrivateKeyObject(privateKeyString))
   },
-  verify(data, signature, publicKeyString) {
-    let buffer = data
+  verify(data, signature, publicKeyPath) {
+    let dataBuffer = data
     if(!Buffer.isBuffer(data)) {
-      buffer = Buffer.from(data, encoding)
+      dataBuffer = Buffer.from(data, encoding)
     }
-    return crypto.verify(algorithm, buffer, _getPublicKeyObject(publicKeyString), signature)
+
+    const signBuffer = Buffer.from(signature, encoding)
+    return crypto.verify(algorithm, dataBuffer, _getPublicKeyObject(publicKeyPath), signBuffer)
   }
 }

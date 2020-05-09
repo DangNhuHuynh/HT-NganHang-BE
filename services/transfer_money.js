@@ -187,15 +187,18 @@ async function verificationTransferRequest(req, user, input) {
       }
     }
 
-    const receiver_balance = receiverPaymentAccount.balance + sum_balance;
-    receiverPaymentAccount.balance = receiver_balance
-    await receiverPaymentAccount.save()
-
+    const balance = await updateBalance(receiverPaymentAccount.account_number, sum_balance)
+    if (balance.error) {
+      return {
+        code: balance.error.code,
+        res: { message: balance.error.message , data: {}}
+      }
+    }
     await bols.My_model.update(req, 'TransferOtp', { transaction_id }, {status: 1});
 
     return {
       code: 200,
-      res: {message: 'Giao dịch thành công.', data: {
+      res: { message: 'Giao dịch thành công.', data: {
           new_balance: balance,
       }}
     }
@@ -203,6 +206,27 @@ async function verificationTransferRequest(req, user, input) {
 
   // Call API thực hiện giao dịch đối tác
   return callApiLinkBanking()
+}
+
+async function updateBalance(accountNumber, money) {
+  const paymentAccount = await bols.My_model.find_first('PaymentAccount', {
+    account_number: accountNumber,
+    status: 1
+  })
+
+  if (!paymentAccount) {
+    return { error: helpers.error_const.ACCOUNT_DOESNT_EXISTS }
+  }
+
+  const balance = paymentAccount.balance + money;
+  if (balance < 50000) {
+    return { error: helpers.error_const.BALANCE_DOESNT_ENOUGH }
+  }
+
+  paymentAccount.balance = balance
+  await paymentAccount.save()
+
+  return balance
 }
 
 // Call API thực hiện giao dịch đối tác
@@ -214,4 +238,5 @@ function callApiLinkBanking() {
 module.exports = {
   newTransferRequest,
   verificationTransferRequest,
+  updateBalance,
 }

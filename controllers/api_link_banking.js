@@ -3,9 +3,15 @@ const router = express.Router();
 const bols = require('../model_bols');
 const middleware = require('../configs/middlewware')
 const ObjectId = require('mongoose').Types.ObjectId
+const hmacService = require('../services/crypto/hmac')
+const rsaService = require('../services/crypto/rsa')
+const transferService = require('../services/transfer_money')
 
 const ERRORS = helpers.error_const
 
+/**
+ * Get account info
+ */
 router.post('/account', middleware.linkApiVerifyWithHash, async function (req, res, next) {
   const { userName, accountNumber } = req.body.data || {}
   if (!userName && !accountNumber) {
@@ -29,6 +35,53 @@ router.post('/account', middleware.linkApiVerifyWithHash, async function (req, r
 
   return res.json({ message: 'OK', data: account })
 });
+
+router.post('/money-transfer/plus', middleware.linkApiVerifyWithSign, async function (req, res, next) {
+  let { amount } = req.body.data || {}
+
+  _transferMoney(amount, req, res)
+})
+
+router.post('/money-transfer/minus', middleware.linkApiVerifyWithSign, async function (req, res, next) {
+  let { amount } = req.body.data || {}
+
+  _transferMoney(-amount, req, res)
+})
+
+async function _transferMoney(parsedAmount, req, res) {
+  const { from, fromAccountNumber, toAccountNumber, amount, description } = req.body.data || {}
+  const linkBanking = req.linkBanking
+
+  const data = {
+    remitter_account_number: fromAccountNumber,
+    bank_remitter: linkBanking.name,
+    receiver_account_number: toAccountNumber,
+    bank_receiver: 'HPK',
+    deposit_money: parsedAmount,
+    type_settle: 0,
+    billing_cost: 0,
+    status: 1,
+    description,
+    transaction_type: 0,
+  };
+
+  const transaction = await bols.My_model.create(req, 'TransactionHistory', data);
+  if (transaction.status != 200) {
+    const err = ERRORS.UNKOWN
+    return res.status(500).json({ error: err.code, message: err.message, data: req.body })
+  }
+
+  const balance = await transferService.updateBalance(toAccountNumber, parsedAmount)
+  if (balance.error) {
+    await bols.My_model.delete(req, 'TransactionHistory', { _id: new ObjectId(transaction._id) })
+    return res.status(500).json({ error: balance.error.code, message: balance.error.message, data: {} })
+  }
+
+  const responseData = { transaction: transaction.data }
+  const hash = hmacService.hash(JSON.stringify(responseData))
+  const sign = rsaService.sign(JSON.stringify(responseData))
+  return res.json({ message: 'OK', hash, sign, data: responseData })
+}
 
 async function _getAccountByUserName(userName) {
   const user = await bols.My_model.find_first('Account', {
