@@ -230,7 +230,7 @@ async function updateBalance(accountNumber, money) {
 }
 
 // Call API thực hiện giao dịch đối tác
-function callApiLinkBanking() {
+function callApiTransferToLinkBanking() {
   // TODO
 }
 

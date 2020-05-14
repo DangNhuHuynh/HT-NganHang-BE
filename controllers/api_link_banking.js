@@ -77,7 +77,7 @@ async function _transferMoney(parsedAmount, req, res) {
     return res.status(500).json({ error: balance.error.code, message: balance.error.message, data: {} })
   }
 
-  const responseData = { transaction: transaction.data }
+  const responseData = { transaction: transaction.data, ts: Date.now }
   const hash = hmacService.hash(JSON.stringify(responseData))
   const sign = rsaService.sign(JSON.stringify(responseData))
   return res.json({ message: 'OK', hash, sign, data: responseData })

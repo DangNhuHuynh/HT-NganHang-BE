@@ -1,8 +1,8 @@
-var express = require('express');
-var account = express.Router();
-var db = require('../models');
-var bols = require('../model_bols');
-var ObjectId = require('mongoose').Types.ObjectId;
+const express = require('express')
+const account = express.Router()
+const bols = require('../model_bols')
+const ObjectId = require('mongoose').Types.ObjectId
+const hmacService = require('../services/crypto/hmac')
 
 const ALL = 0
 const PAYMENT_TYPE = 1
@@ -54,31 +54,47 @@ account.get('/me', async function (req, res, next) {
 });
 
 
-account.get('/:account_number', async function (req, res, next) {
+account.get('/:bank_id/:account_number', async function (req, res, next) {
+  const bankId = req.params.bank_id
   const accountNumber = req.params.account_number
 
-  const account = await bols.My_model.find_first('PaymentAccount', {
-    account_number: accountNumber
+  const linkBanking = await bols.My_model.find_first('LinkBanking', {
+    _id: new ObjectId(bankId),
   })
-
-  if (!account) {
-    return res.status(400).json({ message: `Account doesn't exists`, data: {} });
+  if (!linkBanking) {
+    return res.status(500).json({ message: 'Ngân hàng không tồn tại.', data: { bank_id: req.params.bank_id } });
   }
 
-  const customer = await bols.My_model.find_first('Customer', {
-    _id: new ObjectId(account.customer_id)
-  })
-
-  if (!account) {
-    return res.status(400).json({ message: `Customer doesn't exists`, data: {} });
+  const data = {
+    accountNum: accountNumber,
+    ts: Date.now()
   }
+  const hash = hmacService.hash(JSON.stringify(data))
 
-  return res.status(200).json({ message: 'Get account success.', data: {
-      account_number: account.account_number,
-      account_bank: 'HPK',
-      customer_name: customer.name,
+  try {
+    const result = await helpers.http.request({
+      method: 'POST',
+      url: linkBanking.endpoint + '/openapi/info',
+      body: {
+        hash,
+        data,
+        partnerCode: linkBanking.selfPartnerId,
+      },
+    })
+    if (result.code != 0) {
+      res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })
     }
-  });
+
+    const accountData = result.data || {}
+    return res.status(200).json({ message: 'Get link account success.', data: {
+        account_number: accountData.accountNum,
+        account_bank: linkBanking.name,
+        customer_name: accountData.name,
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: e.message } })
+  }
 })
 
 module.exports = account;

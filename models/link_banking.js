@@ -7,7 +7,13 @@ var LinkBankingSchema = new Schema({
         type: String,
         required: true,
     },
+    // Their bank partner id
     partnerId: {
+      type: String,
+      required: true,
+    },
+    // Our partner id
+    selfPartnerId: {
       type: String,
       required: true,
     },
@@ -18,6 +24,11 @@ var LinkBankingSchema = new Schema({
     },
     // Secret key (using to hash content)
     secretKey: {
+        type: String,
+        default: ''
+    },
+  // Api endpoint
+    endpoint: {
         type: String,
         default: ''
     },
