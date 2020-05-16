@@ -1,10 +1,10 @@
 const crypto = require('crypto')
 const encoding = 'utf8'
 
-const SECRET_KEY = '9yvs4KZJFQMK22tvTvLPhT7K'
+const MY_SECRET_HMAC = process.env.MY_SECRET_HMAC
 
 module.exports = {
-  hash(data, secretKey = SECRET_KEY) {
+  hash(data, secretKey = MY_SECRET_HMAC) {
     const hmac = crypto.createHmac('sha256', secretKey)
     hmac.update(data)
     return hmac.digest('hex')

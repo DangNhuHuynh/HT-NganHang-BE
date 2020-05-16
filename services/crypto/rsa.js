@@ -1,7 +1,7 @@
 const { writeFileSync, readFileSync } = require('fs')
 const crypto = require('crypto')
 const path = require('path')
-const SECRET_RSA = 'A7Scu7FuuFFY3AHKaJzLF3bb'
+const MY_SECRET_RSA = process.env.MY_SECRET_RSA
 
 const privateKeyFileName = 'private.pem'
 const publicKeyFileName = 'public.pem'
@@ -17,7 +17,7 @@ const privateKeyOption = {
   type: 'pkcs1',
   format: 'pem',
   cipher: 'aes-256-cbc',
-  passphrase: SECRET_RSA, // protects the private key (key for Encryption private key)
+  passphrase: MY_SECRET_RSA, // protects the private key (key for Encryption private key)
 }
 
 const privateKeyPath = path.resolve(privateKeyFileName)
