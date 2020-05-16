@@ -67,7 +67,7 @@ async function _transferMoney(parsedAmount, req, res) {
 
   const transaction = await bols.My_model.create(req, 'TransactionHistory', data);
   if (transaction.status != 200) {
-    const err = ERRORS.UNKOWN
+    const err = ERRORS.UNKNOWN
     return res.status(500).json({ error: err.code, message: err.message, data: req.body })
   }
 

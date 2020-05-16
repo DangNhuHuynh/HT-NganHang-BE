@@ -31,9 +31,9 @@ const ERRORS = {
     code: 20003,
     message: 'balance doesn\'t enough to exec this transaction.',
   },
-  UNKOWN: {
+  UNKNOWN: {
     code: 99999,
-    message: 'UNKOWN ERROR.',
+    message: 'UNKNOWN ERROR.',
   }
 }
 

@@ -34,5 +34,4 @@ async function request({ url, method, headers, body }) {
 
 module.exports = {
   request,
-  commonJsonHeader,
 }
