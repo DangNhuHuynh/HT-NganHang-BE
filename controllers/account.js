@@ -2,8 +2,8 @@ const express = require('express')
 const account = express.Router()
 const bols = require('../model_bols')
 const ObjectId = require('mongoose').Types.ObjectId
-const hmacService = require('../services/crypto/hmac')
 const rsaLinkApi = require('../services/link-converters/rsa/api')
+const pgpLinkApi = require('../services/link-converters/pgp/api')
 
 const ALL = 0
 const PAYMENT_TYPE = 1
@@ -70,23 +70,44 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
   return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
 
   const data = {
-    accountNum: accountNumber,
-    ts: Date.now()
+    accountNumber,
   }
 
   try {
-    const result = await rsaLinkApi.getAccountInfo(data)
-    if (result.code != 0) {
-      res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })
-    }
+    // TODO: create map to handle multi link banking
+    let result
+    if (bankId === '5eb6cd4714fc542fb924748a') {
+      const response = await rsaLinkApi.getAccountInfo(data)
+      if (response.status != 200) {
+        res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })
+      }
 
-    const accountData = result.data || {}
-    return res.status(200).json({ message: 'Get link account success.', data: {
+      const accountData = response.data || {}
+      result = {
         account_number: accountData.accountNum,
         account_bank: linkBanking.name,
         customer_name: accountData.name,
       }
-    })
+    }
+
+    // TODO: create map to handle multi link banking
+    if (bankId === 'pgp') {
+      const response = await pgpLinkApi.getAccountInfo(data)
+      if (response.status != 200) {
+        res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })
+      }
+
+      const accountData = response.data || {}
+      result = {
+        account_number: accountNumber,
+        account_bank: linkBanking.name,
+        customer_name: accountData.fullName,
+      }
+    }
+
+
+
+    return res.status(200).json({ message: 'Get link account success.', data: result})
   } catch (e) {
     res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: e.message } })
   }

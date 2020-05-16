@@ -39,9 +39,6 @@ function createRequestWithHashing({ endpoint, data }) {
     partnerCode: MY_PARTNER_CODE,
   }
 
-  console.log("=========")
-  console.log(body)
-
   return http.request({
     method: 'POST',
     url: BASE_URL + endpoint,

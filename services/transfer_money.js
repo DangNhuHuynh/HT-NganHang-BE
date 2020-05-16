@@ -1,5 +1,7 @@
 var bols = require('../model_bols');
 var ObjectId = require('mongoose').Types.ObjectId;
+const rsaLinkApi = require('../services/link-converters/rsa/api')
+const pgpLinkApi = require('../services/link-converters/pgp/api')
 
 async function newTransferRequest(req, user, input) {
   const { customer } = await helpers.auth_helper.get_userinfo(user._id)
@@ -205,7 +207,16 @@ async function verificationTransferRequest(req, user, input) {
   }
 
   // Call API thực hiện giao dịch đối tác
-  return _callApiTransferToLinkBanking(transactionData)
+  const linkResult = await _callApiTransferToLinkBanking(transactionData, user)
+
+  if (linkResult.code === 200) {
+    linkResult.data = {
+      ...linkResult.data,
+      new_balance: balance,
+    }
+  }
+
+  return linkResult
 }
 
 async function updateBalance(accountNumber, money) {
@@ -230,10 +241,49 @@ async function updateBalance(accountNumber, money) {
 }
 
 // Call API thực hiện giao dịch đối tác
-function _callApiTransferToLinkBanking(transaction) {
-  console.log(transaction)
-}
+async function _callApiTransferToLinkBanking(transaction, user) {
+  const { customer } = await helpers.auth_helper.get_userinfo(user._id)
 
+  const data = {
+    from: customer.name,
+    fromAccountNumber: transaction.remitter_account_number,
+    toAccountNumber: transaction.receiver_account_number,
+    amount: transaction.deposit_money,
+    description: transaction.description
+  }
+
+  // TODO: create map to handle multi link banking
+  let result
+  if (transaction.bank_receiver === '5eb6cd4714fc542fb924748a') {
+    result = await rsaLinkApi.plusMoney(data)
+
+  }
+
+  // TODO: create map to handle multi link banking
+  if (transaction.bank_receiver === 'pgp') {
+    result = await pgpLinkApi.plusMoney(data)
+  }
+
+  // Else, not found
+  else {
+    return {
+      code: 400,
+      res: { message: 'Giao dịch liên ngân hàng không thành công, ngân hàng liên kết không tồn tại.', data: {}}
+    }
+  }
+
+  if (result.status !== 200) {
+    return {
+      code: 400,
+      res: { message: 'Giao dịch liên ngân hàng không thành công.', data: result }
+    }
+  }
+
+  return {
+    code: 200,
+    res: { message: 'Giao dịch thành công.', data: {}}
+  }
+}
 
 module.exports = {
   newTransferRequest,

@@ -12,11 +12,6 @@ var LinkBankingSchema = new Schema({
       type: String,
       required: true,
     },
-    // Our partner id
-    selfPartnerId: {
-      type: String,
-      required: true,
-    },
     // Private Key (using to create sign)
     publicKey: {
         type: String,
@@ -24,11 +19,6 @@ var LinkBankingSchema = new Schema({
     },
     // Secret key (using to hash content)
     secretKey: {
-        type: String,
-        default: ''
-    },
-  // Api endpoint
-    endpoint: {
         type: String,
         default: ''
     },

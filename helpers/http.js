@@ -2,8 +2,17 @@ const fetch = require('node-fetch')
 const querystring = require('querystring')
 
 async function _jsonResponse(promise) {
-  const response = await promise
-  return response.json()
+  try {
+    const response = await promise
+    const json = await response.json()
+    return json
+  } catch (e) {
+    return {
+      errorCode: e.status,
+      message: e.message,
+      result: {}
+    }
+  }
 }
 
 function commonJsonHeader() {
