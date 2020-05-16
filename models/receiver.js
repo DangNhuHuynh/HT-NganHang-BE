@@ -18,6 +18,10 @@ var ReceiverSchema = new Schema({
         type: String,
         required: true,
     },
+    bankId: {
+        type: Schema.Types.ObjectId,
+        ref: 'LinkBanking',
+    },
     // Tên gợi nhớ
     nickname: {
         type: String,

@@ -1,7 +1,7 @@
 const { readFileSync } = require('fs')
 const crypto = require('crypto')
 const path = require('path')
-const http = require('../../helpers/http')
+const http = require('../../../helpers/http')
 
 const BASE_URL = process.env.RSA_BANKING_ENDPOINT
 const PUBLIC_KEY_PATH = process.env.RSA_BANKING_PUBLIC_KEY_PATH
@@ -38,6 +38,9 @@ function createRequestWithHashing({ endpoint, data }) {
     hash: hash(JSON.stringify(payload), MY_SECRET_HMAC),
     partnerCode: MY_PARTNER_CODE,
   }
+
+  console.log("=========")
+  console.log(body)
 
   return http.request({
     method: 'POST',
@@ -104,7 +107,6 @@ function _appendBody(data) {
   return {
     ...data,
     ts: Date.now(),
-    recvWindow: 5000,
   }
 }
 

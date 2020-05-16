@@ -3,6 +3,7 @@ const account = express.Router()
 const bols = require('../model_bols')
 const ObjectId = require('mongoose').Types.ObjectId
 const hmacService = require('../services/crypto/hmac')
+const rsaLinkApi = require('../services/link-converters/rsa/api')
 
 const ALL = 0
 const PAYMENT_TYPE = 1
@@ -65,22 +66,16 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
     return res.status(500).json({ message: 'Ngân hàng không tồn tại.', data: { bank_id: req.params.bank_id } });
   }
 
+  // TODO: remove this fake response when integrate
+  return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
+
   const data = {
     accountNum: accountNumber,
     ts: Date.now()
   }
-  const hash = hmacService.hash(JSON.stringify(data))
 
   try {
-    const result = await helpers.http.request({
-      method: 'POST',
-      url: linkBanking.endpoint + '/openapi/info',
-      body: {
-        hash,
-        data,
-        partnerCode: linkBanking.selfPartnerId,
-      },
-    })
+    const result = await rsaLinkApi.getAccountInfo(data)
     if (result.code != 0) {
       res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })
     }
@@ -91,10 +86,18 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
         account_bank: linkBanking.name,
         customer_name: accountData.name,
       }
-    });
+    })
   } catch (e) {
     res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: e.message } })
   }
 })
+
+function _fakeResponseAccountInfo(input, linkBanking) {
+  return {
+    account_number: input.account_number,
+    account_bank: linkBanking.name,
+    customer_name: 'fake_person',
+  }
+}
 
 module.exports = account;

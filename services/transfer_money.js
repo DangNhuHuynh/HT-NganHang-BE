@@ -205,7 +205,7 @@ async function verificationTransferRequest(req, user, input) {
   }
 
   // Call API thực hiện giao dịch đối tác
-  return callApiLinkBanking()
+  return _callApiTransferToLinkBanking(transactionData)
 }
 
 async function updateBalance(accountNumber, money) {
@@ -230,8 +230,8 @@ async function updateBalance(accountNumber, money) {
 }
 
 // Call API thực hiện giao dịch đối tác
-function callApiTransferToLinkBanking() {
-  // TODO
+function _callApiTransferToLinkBanking(transaction) {
+  console.log(transaction)
 }
 
 

@@ -26,7 +26,7 @@ list_receiver.get('/me', async function (req, res, next) {
 list_receiver.post('/', async function (req, res, next) {
   const user = req.user;
   req.checkBody("account_number", "Số TK không được trống.").notEmpty();
-  req.checkBody("bank", "Vui lòng chọn Banking.").notEmpty();
+  req.checkBody("bank_id", "Vui lòng chọn Banking.").notEmpty();
   req.checkBody("nickname", "Vui lòng nhập tên gợi nhớ.").notEmpty();
 
   var errors = req.validationErrors();
@@ -34,7 +34,7 @@ list_receiver.post('/', async function (req, res, next) {
     return res.status(400).json({message: errors, data: req.body});
   }
 
-  const {account_number, bank, nickname} = req.body
+  const {account_number, bank_id, nickname} = req.body
   const [{customer}, receiverBankAccount] = await Promise.all([
     helpers.auth_helper.get_userinfo(user._id),
     helpers.data_helper.get_payment_bank_account(account_number),
@@ -50,6 +50,18 @@ list_receiver.post('/', async function (req, res, next) {
 
   if (duplicateReciver) {
     return res.status(400).json({message: `Người nhận đã tồn tại`, data: req.body});
+  }
+
+  let bank = 'HPK'
+  if (bank_id != 'HPK') {
+    const linkBanking = await bols.My_model.find_first('LinkBanking', {
+      _id: new ObjectId(bank_id),
+    })
+
+    if (!linkBanking) {
+      return res.status(400).json({message: `Ngân hàng không tồn tại`, data: req.body});
+    }
+    bank = linkBanking.name
   }
 
 

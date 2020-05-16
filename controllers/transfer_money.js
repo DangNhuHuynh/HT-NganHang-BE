@@ -80,7 +80,7 @@ transferMoneyRouter.post('/transfer', async function (req, res, next) {
   const user = req.user;
 
   req.checkBody("receiver_account_number", "Vui lòng nhập số tài khoản nhận.").notEmpty();
-  req.checkBody("bank_receiver", "Vui lòng nhập số tài khoản nhận.").notEmpty();
+  req.checkBody("bank_receiver", "Vui lòng nhập ngân hàng nhận.").notEmpty();
   req.checkBody("deposit_money", "Vui lòng nhập số tiền gửi.").notEmpty();
   req.checkBody("type_settle", "Vui lòng chọn Banking.").notEmpty();
   req.checkBody("billing_cost", "Vui lòng nhập billing cost.").notEmpty();
