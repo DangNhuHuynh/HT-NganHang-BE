@@ -12,10 +12,13 @@ list_receiver.get('/me', async function (req, res, next) {
     .find({customer_id: new ObjectId(customer._id)})
 
   const data = receivers.map(async receiver => {
-    const customer = await helpers.data_helper.get_customer_by_payment_account_number(receiver.account_number)
+    let customer
+    if (receiver.bank === 'HPK') {
+      customer = await helpers.data_helper.get_customer_by_payment_account_number(receiver.account_number)
+    }
     return {
       ...receiver.toJSON(),
-      name: customer.name,
+      name: customer ? customer.name : null,
     }
   })
 
@@ -57,7 +60,7 @@ list_receiver.post('/', async function (req, res, next) {
     if (!linkBanking) {
       return res.status(400).json({message: `Ngân hàng không tồn tại`, data: req.body});
     }
-    bank = linkBanking.name
+    bank = linkBanking._id
   } else {
     const receiverBankAccount = await helpers.data_helper.get_payment_bank_account(account_number)
 
