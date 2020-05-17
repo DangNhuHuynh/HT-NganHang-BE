@@ -66,8 +66,8 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
     return res.status(500).json({ message: 'Ngân hàng không tồn tại.', data: { bank_id: req.params.bank_id } });
   }
 
-  // TODO: remove this fake response when integrate
-  return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
+  // // TODO: remove this fake response when integrate
+  // return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
 
   const data = {
     accountNumber,
@@ -76,7 +76,7 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
   try {
     // TODO: create map to handle multi link banking
     let result
-    if (bankId === '5eb6cd4714fc542fb924748a') {
+    if (bankId === '5ec0b65749410a3695acea81') {
       const response = await rsaLinkApi.getAccountInfo(data)
       if (response.status != 200) {
         res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })
@@ -91,7 +91,7 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
     }
 
     // TODO: create map to handle multi link banking
-    if (bankId === 'pgp') {
+    else if (bankId === '5ec0d59381a9053d16c4eef3') {
       const response = await pgpLinkApi.getAccountInfo(data)
       if (response.status != 200) {
         res.status(500).json({ message: 'Có lỗi xảy ra khi kết nối với ngân hàng liên kết.', data: { link_message: result.message } })

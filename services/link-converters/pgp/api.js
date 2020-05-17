@@ -2,7 +2,7 @@ const linkCrypto = require('./crypto')
 
 async function getAccountInfo(input) {
   const data = {
-    STTTH: input.accountNumber
+    STTTH: input.accountNumber.toString()
   }
 
   const result = await linkCrypto.createRequestWithHashing({ endpoint: 'InfoAccount', data })
@@ -10,7 +10,7 @@ async function getAccountInfo(input) {
     return { status: 500, errorCode: result.errorCode, message: result.message, data: {} }
   }
 
-  return { status: 200, message: result.message, data: result.data }
+  return { status: 200, message: result.message, data: result.account }
 }
 
 /**
@@ -20,9 +20,9 @@ async function getAccountInfo(input) {
  */
 async function plusMoney(input) {
   const data = {
-    STTTHAnother: input.fromAccountNumber,
-    STTTH: input.toAccountNumber,
-    Money: input.amount,
+    STTTHAnother: input.fromAccountNumber.toString(),
+    STTTH: input.toAccountNumber.toString(),
+    Money: input.amount.toString(),
   }
   const result = await linkCrypto.createRequestWithSignature({ endpoint: 'TranferInternerAnotherBank', data })
 
@@ -30,12 +30,12 @@ async function plusMoney(input) {
     return { status: 500, errorCode: result.errorCode, message: result.message, data: {} }
   }
 
-  const jsonResponseData = JSON.stringify(result.data)
-  const verifySignResult = linkCrypto.verifySign(jsonResponseData, result.signature)
-  const verifyHashResult = linkCrypto.verifyHash(jsonResponseData, result.hash)
+  const responseData = result
+  const verifySignResult = linkCrypto.verifySign(responseData.sign)
+  const verifyHashResult = linkCrypto.verifyHash()
 
   if (verifySignResult && verifyHashResult) {
-    return { status: 200, message: result.message, data: result }
+    return { status: 200, message: responseData.message, data: responseData }
   }
 
   return { status: 500, errorCode: result.errorCode, message: result.message, data: {} }

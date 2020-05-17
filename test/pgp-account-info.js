@@ -3,7 +3,7 @@ const pgpLinkApi = require('../services/link-converters/pgp/api')
 
 async function run() {
   const data = {
-    accountNumber: '123456789',
+    accountNumber: '100001',
   }
 
   const result = await pgpLinkApi.getAccountInfo(data)

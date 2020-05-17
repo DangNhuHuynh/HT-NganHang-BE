@@ -254,13 +254,12 @@ async function _callApiTransferToLinkBanking(transaction, user) {
 
   // TODO: create map to handle multi link banking
   let result
-  if (transaction.bank_receiver === '5eb6cd4714fc542fb924748a') {
+  if (transaction.bank_receiver === '5ec0b65749410a3695acea81') {
     result = await rsaLinkApi.plusMoney(data)
-
   }
 
   // TODO: create map to handle multi link banking
-  if (transaction.bank_receiver === 'pgp') {
+  else if (transaction.bank_receiver === '5ec0d59381a9053d16c4eef3') {
     result = await pgpLinkApi.plusMoney(data)
   }
 
@@ -277,6 +276,13 @@ async function _callApiTransferToLinkBanking(transaction, user) {
       code: 400,
       res: { message: 'Giao dịch liên ngân hàng không thành công.', data: result }
     }
+  }
+
+  // Update signature
+  const trans = await bols.My_model.find_first('TransactionHistory', {_id: new ObjectId(transaction._id)});
+  if (trans) {
+    trans.sign = result.sign
+    await trans.save()
   }
 
   return {

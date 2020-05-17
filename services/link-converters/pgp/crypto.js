@@ -14,27 +14,31 @@ const LINK_PUBLIC_KEY_PATH = path.join(process.cwd(), PUBLIC_KEY_PATH)
 
 const encoding = 'utf8'
 
-// const privateKeyString = readFileSync(MY_PRIVATE_KEY_PATH, encoding)
-// const linkPublicKeyString = readFileSync(LINK_PUBLIC_KEY_PATH, encoding)
+const privateKeyString = readFileSync(MY_PRIVATE_KEY_PATH, encoding)
+const linkPublicKeyString = readFileSync(LINK_PUBLIC_KEY_PATH, encoding)
 
 async function createRequestWithHashing({ endpoint, data }) {
   const payload = _appendBody(data)
   const body = {
     ...payload,
-    Hash: hash(JSON.stringify(payload)),
+    Hash: hash(payload),
   }
 
+  console.log('=======REQUEST========')
   console.log({
     method: 'POST',
     url: BASE_URL + endpoint,
     body,
   })
-
-  return http.request({
+  const response = await http.request({
     method: 'POST',
     url: BASE_URL + endpoint,
     body,
   })
+  console.log('=======RESPONSE========')
+  console.log(response)
+
+  return response
 }
 
 async function createRequestWithSignature({ endpoint, data }) {
@@ -42,21 +46,17 @@ async function createRequestWithSignature({ endpoint, data }) {
   const strPayload = JSON.stringify(payload)
   const body = {
     ...payload,
-    Hash: hash(strPayload),
+    Hash: hash(payload),
     Signature: await sign(strPayload),
   }
 
-  console.log({
+  const response = await http.request({
     method: 'POST',
     url: BASE_URL + endpoint,
     body,
   })
 
-  return http.request({
-    method: 'POST',
-    url: BASE_URL + endpoint,
-    body,
-  })
+  return response
 }
 
 /**
@@ -66,6 +66,7 @@ async function createRequestWithSignature({ endpoint, data }) {
  */
 async function sign(data) {
   const { keys: [privateKey] } = await openpgp.key.readArmored(privateKeyString)
+
   const { data: signatureArmored } = await openpgp.sign({
     message: openpgp.message.fromText(data),
     privateKeys: [privateKey],
@@ -98,15 +99,12 @@ function hash(data) {
  * @returns {Promise<boolean>}
  */
 async function verifySign(signature) {
-  return true
-
-  // TODO: pgp banking doesn't send back signature to verify
   const verified = await openpgp.verify({
-    message: await openpgp.message.readArmored(signature),       // parse armored signature
-    publicKeys: (await openpgp.key.readArmored(linkPublicKeyString)).keys  // for verification
+    message: await openpgp.message.readArmored(signature.trim()),
+    publicKeys: (await openpgp.key.readArmored(linkPublicKeyString)).keys
   });
 
-  await openpgp.stream.readToEnd(verified.data)
+  // await openpgp.stream.readToEnd(verified.data)
 
   const { valid } = verified.signatures[0]
   if (valid) {
@@ -128,7 +126,7 @@ async function verifyHash() {
 function _appendBody(data) {
   return {
     ...data,
-    Time: parseInt(Date.now() / 1000),
+    Time: parseInt(Date.now() / 1000).toString(),
     PartnerCode: MY_PARTNER_CODE,
   }
 }

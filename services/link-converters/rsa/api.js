@@ -38,7 +38,10 @@ async function plusMoney(input) {
   const verifyHashResult = linkCrypto.verifyHash(jsonResponseData, result.hash)
 
   if (verifySignResult && verifyHashResult) {
-    return { status: 200, message: result.message, data: result.data }
+    return { status: 200, message: result.message, data: {
+      ...result.data,
+        sign: result.signature,
+    } }
   }
 
   return { status: 500, errorCode: result.errorCode, message: result.message, data: {} }
@@ -69,7 +72,10 @@ async function minusMoney(input) {
   const verifyHashResult = linkCrypto.verifyHash(jsonResponseData, result.hash)
 
   if (verifySignResult && verifyHashResult) {
-    return { status: 200, message: result.message, data: result.data }
+    return { status: 200, message: result.message, data: {
+      ...result.data,
+      sign: result.signature,
+    } }
   }
 
   return { status: 500, errorCode: result.errorCode, message: result.message, data: {} }

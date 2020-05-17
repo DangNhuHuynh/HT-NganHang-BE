@@ -39,6 +39,8 @@ async function mdwAuth(req, res, next) {
 
 async function linkApiVerifyWithHash(req, res, next) {
   const { data, hash, partnerId } = req.body
+  console.log("======LINK REQUEST======")
+  console.log({ data, hash, partnerId })
   const linkBanking = await _getLinkBanking(partnerId)
   if (!linkBanking) {
     const err = errors.PARTNER_DOESNT_EXISTS
@@ -74,6 +76,8 @@ async function linkApiVerifyWithHash(req, res, next) {
 
 async function linkApiVerifyWithSign(req, res, next) {
   const { data, hash, sign, partnerId } = req.body
+  console.log("======LINK REQUEST======")
+  console.log({ data, hash, sign, partnerId })
 
   const linkBanking = await _getLinkBanking(partnerId)
   if (!linkBanking) {
@@ -86,18 +90,25 @@ async function linkApiVerifyWithSign(req, res, next) {
   const reHash = hmacService.hash(JSON.stringify(data), linkBanking.secretKey)
   if (!hmacService.verifyHash(hash, reHash)) {
     const err = errors.INVALID_HASH
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: err.code, message: err.message, data: req.body })
     return res.status(400).json({ error: err.code, message: err.message, data: req.body })
   }
 
   const publicKeyPath = path.join(process.cwd(), 'storages', linkBanking.publicKey)
   if (!await helpers.file_helper.exist(publicKeyPath)) {
     const err = errors.PUBLIC_KEY_DOESNT_EXISTS
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: err.code, message: err.message, data: req.body })
     return res.status(400).json({ error: err.code, message: err.message, data: req.body })
   }
 
+  console.log(publicKeyPath)
   const verifySign = rsaService.verify(JSON.stringify(data), sign, publicKeyPath)
   if (!verifySign) {
     const err = errors.INVALID_SIGNATURE
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: err.code, message: err.message, data: req.body })
     return res.status(400).json({ error: err.code, message: err.message, data: req.body })
   }
 

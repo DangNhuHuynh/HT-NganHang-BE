@@ -3,12 +3,10 @@ const rsaLinkApi = require('../services/link-converters/rsa/api')
 
 async function run() {
   const data = {
-    accountNumber: '123456789',
+    accountNumber: '07251743899648',
   }
 
   const result = await rsaLinkApi.getAccountInfo(data)
-
-  console.log(result)
 }
 
 run()

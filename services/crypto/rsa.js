@@ -49,7 +49,7 @@ module.exports = {
     if(!Buffer.isBuffer(data)) {
       buffer = Buffer.from(data, encoding)
     }
-    return crypto.sign(algorithm, buffer, _getPrivateKeyObject(privateKeyString))
+    return crypto.sign(algorithm, buffer, _getPrivateKeyObject(privateKeyString)).toString('base64')
   },
   verify(data, signature, publicKeyPath) {
     let dataBuffer = data
@@ -57,7 +57,8 @@ module.exports = {
       dataBuffer = Buffer.from(data, encoding)
     }
 
-    const signBuffer = Buffer.from(signature, encoding)
+    const signDecodedBase64 = Buffer.from(signature, 'base64')
+    const signBuffer = Buffer.from(signDecodedBase64, encoding)
     return crypto.verify(algorithm, dataBuffer, _getPublicKeyObject(publicKeyPath), signBuffer)
   }
 }

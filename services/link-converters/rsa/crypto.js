@@ -11,7 +11,7 @@ const MY_SECRET_RSA = process.env.MY_SECRET_RSA
 const MY_SECRET_HMAC = process.env.MY_SECRET_HMAC
 const MY_PRIVATE_KEY_PATH = path.join(process.cwd(), 'private.pem')
 
-const SECRET_HMAC = 'link_banking_secret_key'
+const SECRET_HMAC = process.env.RSA_BANKING_HASH_SECRET
 const LINK_PUBLIC_KEY_PATH = path.join(process.cwd(), PUBLIC_KEY_PATH)
 const encoding = 'utf8'
 const algorithm = 'SHA256'
@@ -31,7 +31,7 @@ const privateKeyOption = {
   passphrase: MY_SECRET_RSA, // protects the private key (key for Encryption private key)
 }
 
-function createRequestWithHashing({ endpoint, data }) {
+async function createRequestWithHashing({ endpoint, data }) {
   const payload = _appendBody(data)
   const body = {
     data: payload,
@@ -39,14 +39,24 @@ function createRequestWithHashing({ endpoint, data }) {
     partnerCode: MY_PARTNER_CODE,
   }
 
-  return http.request({
+  console.log('=======REQUEST========')
+  console.log({
     method: 'POST',
     url: BASE_URL + endpoint,
     body,
   })
+  const response = await http.request({
+    method: 'POST',
+    url: BASE_URL + endpoint,
+    body,
+  })
+  console.log('=======RESPONSE========')
+  console.log(response)
+
+  return response
 }
 
-function createRequestWithSignature({ endpoint, data }) {
+async function createRequestWithSignature({ endpoint, data }) {
   const payload = _appendBody(data)
   const strPayload = JSON.stringify(payload)
   const body = {
@@ -56,11 +66,21 @@ function createRequestWithSignature({ endpoint, data }) {
     partnerCode: MY_PARTNER_CODE,
   }
 
-  return http.request({
+  console.log('=======REQUEST========')
+  console.log({
     method: 'POST',
     url: BASE_URL + endpoint,
     body,
   })
+  const response = await http.request({
+    method: 'POST',
+    url: BASE_URL + endpoint,
+    body,
+  })
+  console.log('=======RESPONSE========')
+  console.log(response)
+
+  return response
 }
 
 function sign(data) {
@@ -68,11 +88,13 @@ function sign(data) {
   if(!Buffer.isBuffer(data)) {
     buffer = Buffer.from(data, encoding)
   }
-  return crypto.sign(algorithm, buffer, _getPrivateKeyObject(privateKeyString))
+  return crypto.sign(algorithm, buffer, _getPrivateKeyObject(privateKeyString)).toString('base64')
 }
 
 function hash(data, secretHmac = MY_SECRET_HMAC) {
-  const hmac = crypto.createHmac('sha256', secretHmac)
+  console.log('-----')
+  console.log({data, secretHmac})
+  const hmac = crypto.createHmac(algorithm, secretHmac)
   hmac.update(data)
   return hmac.digest('hex')
 }
@@ -82,7 +104,8 @@ function verifySign(data, signature) {
   if(!Buffer.isBuffer(data)) {
     buffer = Buffer.from(data, encoding)
   }
-  const signBuffer = Buffer.from(signature, encoding)
+  const signDecodedBase64 = Buffer.from(signature, 'base64')
+  const signBuffer = Buffer.from(signDecodedBase64, encoding)
   return crypto.verify(algorithm, buffer, _getPublicKeyObject(linkPublicKeyString), signBuffer)
 }
 
@@ -91,12 +114,13 @@ function verifyHash(data, hash1) {
 
   let buffer1 = hash1
   if(!Buffer.isBuffer(hash1)) {
-    buffer1 = Buffer.from(hash1, encoding)
+    buffer1 = Buffer.from(hash1)
   }
   let buffer2 = hash2
   if(!Buffer.isBuffer(hash2)) {
-    buffer2 = Buffer.from(hash2, encoding)
+    buffer2 = Buffer.from(hash2)
   }
+
   return crypto.timingSafeEqual(buffer1, buffer2)
 }
 

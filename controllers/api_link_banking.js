@@ -16,6 +16,8 @@ router.post('/account', middleware.linkApiVerifyWithHash, async function (req, r
   const { userName, accountNumber } = req.body.data || {}
   if (!userName && !accountNumber) {
     const err = ERRORS.INVALID_REQUEST_BODY
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: err.code, message: err.message, data: req.body })
     return res.status(400).json({ error: err.code, message: err.message, data: req.body })
   }
 
@@ -30,8 +32,12 @@ router.post('/account', middleware.linkApiVerifyWithHash, async function (req, r
   // Still empty
   if (!account) {
     const err = ERRORS.ACCOUNT_DOESNT_EXISTS
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: err.code, message: err.message, data: req.body })
     return res.status(400).json({ error: err.code, message: err.message, data: req.body })
   }
+  console.log("========LINK RESPONSE=======")
+  console.log({ message: 'OK', data: account })
 
   return res.json({ message: 'OK', data: account })
 });
@@ -68,12 +74,16 @@ async function _transferMoney(parsedAmount, req, res) {
   const transaction = await bols.My_model.create(req, 'TransactionHistory', data);
   if (transaction.status != 200) {
     const err = ERRORS.UNKNOWN
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: err.code, message: err.message, data: req.body })
     return res.status(500).json({ error: err.code, message: err.message, data: req.body })
   }
 
   const balance = await transferService.updateBalance(toAccountNumber, parsedAmount)
   if (balance.error) {
     await bols.My_model.delete(req, 'TransactionHistory', { _id: new ObjectId(transaction._id) })
+    console.log("========LINK RESPONSE=======")
+    console.log({ error: balance.error.code, message: balance.error.message, data: {} })
     return res.status(500).json({ error: balance.error.code, message: balance.error.message, data: {} })
   }
 
@@ -88,6 +98,8 @@ async function _transferMoney(parsedAmount, req, res) {
   }
   const hash = hmacService.hash(JSON.stringify(responseData))
   const sign = rsaService.sign(JSON.stringify(responseData))
+  console.log("========LINK RESPONSE=======")
+  console.log({ message: 'OK', hash, sign, data: responseData })
   return res.json({ message: 'OK', hash, sign, data: responseData })
 }
 
@@ -126,7 +138,7 @@ async function _getAccountByNumber(accountNumber) {
   if (!user) return null
 
   return {
-    userName: user.name,
+    userName: user.username,
     name: customer.name,
     phone: customer.phone,
     accountNumber: paymentAccount.account_number,

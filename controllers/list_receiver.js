@@ -35,14 +35,10 @@ list_receiver.post('/', async function (req, res, next) {
   }
 
   const {account_number, bank_id, nickname} = req.body
-  const [{customer}, receiverBankAccount] = await Promise.all([
+  const [{customer}] = await Promise.all([
     helpers.auth_helper.get_userinfo(user._id),
-    helpers.data_helper.get_payment_bank_account(account_number),
   ])
 
-  if (!receiverBankAccount) {
-    return res.status(400).json({message: `Tài khoản người nhận không tồn tại`, data: req.body});
-  }
   const duplicateReciver = await bols.My_model.find_first('Receiver', {
     customer_id: new ObjectId(customer._id),
     account_number,
@@ -62,8 +58,13 @@ list_receiver.post('/', async function (req, res, next) {
       return res.status(400).json({message: `Ngân hàng không tồn tại`, data: req.body});
     }
     bank = linkBanking.name
-  }
+  } else {
+    const receiverBankAccount = await helpers.data_helper.get_payment_bank_account(account_number)
 
+    if (!receiverBankAccount) {
+      return res.status(400).json({message: `Tài khoản người nhận không tồn tại`, data: req.body});
+    }
+  }
 
   const data = {
     customer_id: customer._id,

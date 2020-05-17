@@ -52,7 +52,11 @@ var TransactionHistorySchema = new Schema({
         type: Number,
         required: true,
         default: 0,
-    }
+    },
+    sign: {
+        type: Number,
+        default: null,
+    },
 },
 {
     timestamps: true //tự động thêm field createAt và updateAt
