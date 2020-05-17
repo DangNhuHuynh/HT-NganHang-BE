@@ -54,7 +54,7 @@ var TransactionHistorySchema = new Schema({
         default: 0,
     },
     sign: {
-        type: Number,
+        type: String,
         default: null,
     },
 },

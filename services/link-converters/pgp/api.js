@@ -6,7 +6,7 @@ async function getAccountInfo(input) {
   }
 
   const result = await linkCrypto.createRequestWithHashing({ endpoint: 'InfoAccount', data })
-  if (result.errorCode != 0) {
+  if (result.errorCode) {
     return { status: 500, errorCode: result.errorCode, message: result.message, data: {} }
   }
 
@@ -23,6 +23,7 @@ async function plusMoney(input) {
     STTTHAnother: input.fromAccountNumber.toString(),
     STTTH: input.toAccountNumber.toString(),
     Money: input.amount.toString(),
+    content: input.description,
   }
   const result = await linkCrypto.createRequestWithSignature({ endpoint: 'TranferInternerAnotherBank', data })
 

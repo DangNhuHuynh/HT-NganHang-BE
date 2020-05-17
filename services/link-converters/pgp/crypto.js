@@ -100,7 +100,7 @@ function hash(data) {
  */
 async function verifySign(signature) {
   const verified = await openpgp.verify({
-    message: await openpgp.message.readArmored(signature.trim()),
+    message: await openpgp.message.readArmored(signature),
     publicKeys: (await openpgp.key.readArmored(linkPublicKeyString)).keys
   });
 
