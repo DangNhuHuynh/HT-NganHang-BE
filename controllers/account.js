@@ -66,8 +66,8 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
     return res.status(500).json({ message: 'Ngân hàng không tồn tại.', data: { bank_id: req.params.bank_id } });
   }
 
-  // // TODO: remove this fake response when integrate
-  // return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
+  // TODO dummy
+  return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
 
   const data = {
     accountNumber,

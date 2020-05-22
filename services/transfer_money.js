@@ -2,6 +2,7 @@ var bols = require('../model_bols');
 var ObjectId = require('mongoose').Types.ObjectId;
 const rsaLinkApi = require('../services/link-converters/rsa/api')
 const pgpLinkApi = require('../services/link-converters/pgp/api')
+const rsaService = require('../services/crypto/rsa')
 
 async function newTransferRequest(req, user, input) {
   const { customer } = await helpers.auth_helper.get_userinfo(user._id)
@@ -252,24 +253,27 @@ async function _callApiTransferToLinkBanking(transaction, user) {
     description: transaction.description
   }
 
-  // TODO: create map to handle multi link banking
-  let result
-  if (transaction.bank_receiver === '5ec0b65749410a3695acea81') {
-    result = await rsaLinkApi.plusMoney(data)
-  }
+  // TODO dummy
+  const result = _fakePlusMoneyData()
 
   // TODO: create map to handle multi link banking
-  else if (transaction.bank_receiver === '5ec0d59381a9053d16c4eef3') {
-    result = await pgpLinkApi.plusMoney(data)
-  }
-
-  // Else, not found
-  else {
-    return {
-      code: 400,
-      res: { message: 'Giao dịch liên ngân hàng không thành công, ngân hàng liên kết không tồn tại.', data: {}}
-    }
-  }
+  // let result
+  // if (transaction.bank_receiver === '5ec0b65749410a3695acea81') {
+  //   result = await rsaLinkApi.plusMoney(data)
+  // }
+  //
+  // // TODO: create map to handle multi link banking
+  // else if (transaction.bank_receiver === '5ec0d59381a9053d16c4eef3') {
+  //   result = await pgpLinkApi.plusMoney(data)
+  // }
+  //
+  // // Else, not found
+  // else {
+  //   return {
+  //     code: 400,
+  //     res: { message: 'Giao dịch liên ngân hàng không thành công, ngân hàng liên kết không tồn tại.', data: {}}
+  //   }
+  // }
 
   if (result.status !== 200) {
     return {
@@ -280,14 +284,32 @@ async function _callApiTransferToLinkBanking(transaction, user) {
 
   // Update signature
   const trans = await bols.My_model.find_first('TransactionHistory', {_id: new ObjectId(transaction._id)});
-  if (trans) {
-    trans.sign = result.sign
+  if (trans && result.data.sign) {
+    trans.sign = result.data.sign
     await trans.save()
   }
 
   return {
     code: 200,
     res: { message: 'Giao dịch thành công.', data: {}}
+  }
+}
+
+function _fakePlusMoneyData() {
+  const data = {
+    tranId: 1831,
+    accountNum: 73983492348,
+    amount: 100000,
+    ts: Date.now(),
+  }
+  const sign = rsaService.sign(JSON.stringify(data))
+
+  return {
+    status: 200,
+    data: {
+      ...data,
+      sign,
+    }
   }
 }
 

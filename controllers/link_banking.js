@@ -33,6 +33,29 @@ link_banking.get('', async function (req, res, next) {
 })
 
 /**
+ * Get list linked banks
+ */
+link_banking.get('/transaction', async function (req, res, next) {
+  const transactions = await bols.My_model.find_all('TransactionHistory', {
+    $or: [
+      { bank_receiver: { $ne: 'HPK' } },
+      { bank_remitter: { $ne: 'HPK' } },
+    ]
+  })
+  const banks = await bols.My_model.find_all('LinkBanking', {}, '_id name')
+  const result = transactions.map(transaction => {
+    const bank = banks.find(bank => bank._id == transaction.bank_remitter || bank._id == transaction.bank_receiver)
+
+    return {
+      ...transaction.toJSON(),
+      link_banking_name: (bank || {}).name
+    }
+  })
+
+  return res.status(200).json({message: 'Get list banking transactions success.', data: result})
+})
+
+/**
  * Link new bank
  */
 link_banking.post('', upload.single('file'), async function (req, res, next) {
