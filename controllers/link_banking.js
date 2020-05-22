@@ -36,10 +36,28 @@ link_banking.get('', async function (req, res, next) {
  * Get list linked banks
  */
 link_banking.get('/transaction', async function (req, res, next) {
+  const { start, end, bank_id } = req.query
+  const bankCondition = bank_id
+    ? {
+      $or: [
+        { bank_receiver: bank_id },
+        { bank_remitter: bank_id },
+      ]
+    } : {
+      $or: [
+        { bank_receiver: { $ne: 'HPK' } },
+        { bank_remitter: { $ne: 'HPK' } },
+      ]
+    }
   const transactions = await bols.My_model.find_all('TransactionHistory', {
-    $or: [
-      { bank_receiver: { $ne: 'HPK' } },
-      { bank_remitter: { $ne: 'HPK' } },
+    $and: [
+      bankCondition,
+      {
+        createdAt: { $gte: start }
+      },
+      {
+        createdAt: { $lte: end }
+      }
     ]
   })
   const banks = await bols.My_model.find_all('LinkBanking', {}, '_id name')

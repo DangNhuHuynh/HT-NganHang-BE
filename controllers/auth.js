@@ -26,8 +26,8 @@ auth.post('/login', async function (req, res) {
 				email: user.email,
 			};
 
-			const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
-			const refreshToken = await helpers.helper.renderToken(refreshTokenSecret, claims, 1);
+			const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144); // 10 minutes
+			const refreshToken = await helpers.helper.renderToken(refreshTokenSecret, claims, 1); // 1 day
 			await bols.My_model.update(req, 'Account', { username: username }, { refresh_token: refreshToken });
 
 			return res.status(200).json({ token, refreshToken, username });
@@ -55,7 +55,7 @@ auth.post('/re-renderToken', async function (req, res) {
         email: user.email,
       };
 
-      const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144);
+      const token = await helpers.helper.renderToken(tokenSecret, claims, 1 / 144); // 10 minutes
 
       return res.status(200).json({ message: 'Re-render token success.', data: { token, username } });
     } else {
@@ -78,10 +78,10 @@ auth.post('/logout', async function (req, res) {
 	} else {
 		const { token } = req.headers;
 		// Clear refresToken
-		const updateRefreshToken = await bols.My_model.update(req, 'Account', { username: username }, { refresh_token: '' });
+		await bols.My_model.update(req, 'Account', { username: username }, { refresh_token: '' });
 
 		// Create BlackList AccessToken
-		const createBlackList = await bols.My_model.update(req, 'Black_list_token', { accessToken: token });
+    await bols.My_model.update(req, 'Black_list_token', { accessToken: token });
 
 		return res.status(200).json({ message: 'User logout', data: req.body });
 	}
