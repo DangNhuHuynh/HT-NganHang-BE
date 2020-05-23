@@ -254,26 +254,26 @@ async function _callApiTransferToLinkBanking(transaction, user) {
   }
 
   // TODO dummy
-  const result = _fakePlusMoneyData()
+  // const result = _fakePlusMoneyData()
 
   // TODO: create map to handle multi link banking
-  // let result
-  // if (transaction.bank_receiver === '5ec0b65749410a3695acea81') {
-  //   result = await rsaLinkApi.plusMoney(data)
-  // }
-  //
-  // // TODO: create map to handle multi link banking
-  // else if (transaction.bank_receiver === '5ec0d59381a9053d16c4eef3') {
-  //   result = await pgpLinkApi.plusMoney(data)
-  // }
-  //
-  // // Else, not found
-  // else {
-  //   return {
-  //     code: 400,
-  //     res: { message: 'Giao dịch liên ngân hàng không thành công, ngân hàng liên kết không tồn tại.', data: {}}
-  //   }
-  // }
+  let result
+  if (transaction.bank_receiver === '5ec0b65749410a3695acea81') {
+    result = await rsaLinkApi.plusMoney(data)
+  }
+
+  // TODO: create map to handle multi link banking
+  else if (transaction.bank_receiver === '5ec0d59381a9053d16c4eef3') {
+    result = await pgpLinkApi.plusMoney(data)
+  }
+
+  // Else, not found
+  else {
+    return {
+      code: 400,
+      res: { message: 'Giao dịch liên ngân hàng không thành công, ngân hàng liên kết không tồn tại.', data: {}}
+    }
+  }
 
   if (result.status !== 200) {
     return {

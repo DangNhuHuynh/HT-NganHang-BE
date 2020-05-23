@@ -67,7 +67,7 @@ account.get('/:bank_id/:account_number', async function (req, res, next) {
   }
 
   // TODO dummy
-  return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
+  // return res.status(200).json({ message: 'Get link account success.', data: _fakeResponseAccountInfo(req.params, linkBanking) })
 
   const data = {
     accountNumber,
