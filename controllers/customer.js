@@ -40,7 +40,7 @@ customerRouter.post("/", async function (req, res) {
   });
   var paymentAccount = await bols.My_model.create(req, 'PaymentAccount', {
     customer_id: new ObjectId(customer.data._id),
-    account_number: await _generateAccountNumber(),
+    account_number: await helpers.data_helper.generateAccountNumber(),
     balance: 0,
     status: 1,
   });
@@ -60,16 +60,5 @@ customerRouter.post("/", async function (req, res) {
       }
     }});
 });
-
-async function _generateAccountNumber() {
-  const randomNum = Math.floor(Math.random() * 1000000); // returns a random integer from 0 to 1000000
-  const accountNumber = 1000000 + randomNum
-
-  if (await bols.My_model.find_first('PaymentAccount', { account_number: accountNumber })) {
-    return _generateAccountNumber()
-  }
-
-  return accountNumber
-}
 
 module.exports = customerRouter;

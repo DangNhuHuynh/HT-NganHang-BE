@@ -45,4 +45,15 @@ data_helper.get_bank_account = async function(accountNumber) {
   return paymentAccount || savingAccount
 }
 
+data_helper.generateAccountNumber = async function() {
+  const randomNum = Math.floor(Math.random() * 1000000); // returns a random integer from 0 to 1000000
+  const accountNumber = 1000000 + randomNum
+
+  if (await bols.My_model.find_first('PaymentAccount', { account_number: accountNumber })) {
+    return data_helper.generateAccountNumber()
+  }
+
+  return accountNumber
+}
+
 module.exports = data_helper;
