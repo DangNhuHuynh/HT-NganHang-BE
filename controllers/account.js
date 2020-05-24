@@ -54,6 +54,41 @@ account.get('/me', async function (req, res, next) {
   return res.status(500).json({ message: `Account don't have consumer credit.`, data: {} });
 });
 
+account.post('/transfer_and_delete', async function (req, res, next) {
+  req.checkBody("account_number", "Vui lòng nhập số tài khoản cần xoá.").notEmpty();
+  req.checkBody("target_account_number", "Vui lòng nhập số tài khoản cần nạp tiền.").notEmpty();
+
+  var errors = req.validationErrors()
+  if (errors) {
+    return res.status(400).json({message: errors, data: req.body})
+  }
+
+  const account_number = req.body.account_number
+  const target_account_number = req.body.target_account_number
+  const [paymentAccount, targetPaymentAccount] = await Promise.all([
+    bols.My_model.find_first('PaymentAccount', {account_number}),
+    bols.My_model.find_first('PaymentAccount', {account_number: target_account_number}),
+  ])
+
+  if (!paymentAccount || !targetPaymentAccount) {
+    const errorAccountNumber = !paymentAccount ? paymentAccount.account_number : targetPaymentAccount.account_number
+    return res.status(400).json({
+      message: `Banking account with number ${errorAccountNumber} doesn't exists`,
+      data: {},
+    })
+  }
+
+  targetPaymentAccount.balance += parseInt(paymentAccount.balance) || 0
+  await targetPaymentAccount.save()
+
+  await bols.My_model.delete('PaymentAccount', { account_number: account_number })
+
+  return res.status(200).json({
+    message: 'Update balance successful',
+    data: {}
+  })
+})
+
 account.post('/:customerEmail', async function (req, res, next) {
   const customerEmail = req.params.customerEmail
 
@@ -82,6 +117,19 @@ account.post('/:customerEmail', async function (req, res, next) {
   }});
 });
 
+account.delete('/:account_number', async function (req, res, next) {
+  const account_number = req.params.account_number
+
+  const account = await helpers.data_helper.get_bank_account(account_number)
+  if (!account) {
+    return res.status(400).json({ message: `Payment account doesn't exists`, data: {} });
+  }
+
+  await bols.My_model.delete('PaymentAccount', { account_number: account_number })
+  await bols.My_model.delete('SavingAccount', { account_number: account_number })
+
+  return res.status(200).json({message: 'Delete account success.', data: {}});
+});
 
 account.get('/:bank_id/:account_number', async function (req, res, next) {
   const bankId = req.params.bank_id

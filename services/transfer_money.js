@@ -5,9 +5,8 @@ const pgpLinkApi = require('../services/link-converters/pgp/api')
 const rsaService = require('../services/crypto/rsa')
 
 async function newTransferRequest(req, user, input) {
-  const { customer } = await helpers.auth_helper.get_userinfo(user._id)
   const paymentAccount = await bols.My_model.find_first('PaymentAccount', {
-    customer_id: new ObjectId(customer._id)
+    account_number: req.body.remitter_account_number
   });
   if (!paymentAccount) {
     return {

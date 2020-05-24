@@ -51,10 +51,13 @@ transaction_history_router.get('/me/receive', async function (req, res, next) {
   const { customer } = await helpers.auth_helper.get_userinfo(req.user._id)
   const accountNumber = req.query.account_number
 
+  const oneMonth = 24 * 60 * 60 * 1000 * 30
+  const oneMonthUnix = Date.now() - oneMonth
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     receiver_account_number: {"$in": accountNumberList },
+    createdAt: { $gte: oneMonthUnix },
     transaction_type: 0,
     status: 1,
   });
@@ -67,10 +70,13 @@ transaction_history_router.get('/me/remit', async function (req, res, next) {
   const { customer } = await helpers.auth_helper.get_userinfo(req.user._id)
   const accountNumber = req.query.account_number
 
+  const oneMonth = 24 * 60 * 60 * 1000 * 30
+  const oneMonthUnix = Date.now() - oneMonth
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     remitter_account_number: {"$in": accountNumberList },
+    createdAt: { $gte: oneMonthUnix },
     transaction_type: 0,
     status: 1,
   });
@@ -82,10 +88,13 @@ transaction_history_router.get('/me/debt', async function (req, res, next) {
   const { customer } = await helpers.auth_helper.get_userinfo(req.user._id)
   const accountNumber = req.query.account_number
 
+  const oneMonth = 24 * 60 * 60 * 1000 * 30
+  const oneMonthUnix = Date.now() - oneMonth
   const accounts = await helpers.data_helper.get_all_bank_accounts(customer, { accountNumber })
   const accountNumberList = accounts.map(account => account.account_number)
   const transactions = await bols.My_model.find_all('TransactionHistory', {
     remitter_account_number: {"$in": accountNumberList },
+    createdAt: { $gte: oneMonthUnix },
     transaction_type: 1,
     status: 1,
   });

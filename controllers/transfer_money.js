@@ -7,30 +7,14 @@ const service = require('../services/transfer_money')
 
 transferMoneyRouter.post('/deposit', async function (req, res, next) {
   req.checkBody("money", "Vui lòng nhập số tiền gửi.").notEmpty();
+  req.checkBody("account_number", "Vui lòng nhập số tài khoản cần nạp tiền.").notEmpty();
 
   var errors = req.validationErrors()
-  if (!req.body.username && !req.body.account_number) {
-    errors = 'Vui lòng nhập tên đăng nhập hoặc số tài khoản'
-  }
   if (errors) {
     return res.status(400).json({message: errors, data: req.body})
   }
 
   const account_number = req.body.account_number
-  const username = req.body.username
-  if (!account_number) {
-    const paymentAccount = await _getDefaultPaymentAccountByUsername(username)
-    paymentAccount.balance += parseInt(req.body.money) || 0
-    await paymentAccount.save()
-
-    return res.status(200).json({
-      message: 'Update balance successful',
-      data: {
-        balance: paymentAccount.balance
-      }
-    })
-  }
-
   const [paymentAccount, savingAccount] = await Promise.all([
     bols.My_model.find_first('PaymentAccount', {account_number}),
     bols.My_model.find_first('SavingAccount', {account_number}),
@@ -79,6 +63,7 @@ async function _getDefaultPaymentAccountByUsername(username) {
 transferMoneyRouter.post('/transfer', async function (req, res, next) {
   const user = req.user;
 
+  req.checkBody("remitter_account_number", "Vui lòng nhập số tài khoản nhận.").notEmpty();
   req.checkBody("receiver_account_number", "Vui lòng nhập số tài khoản nhận.").notEmpty();
   req.checkBody("bank_receiver", "Vui lòng nhập ngân hàng nhận.").notEmpty();
   req.checkBody("deposit_money", "Vui lòng nhập số tiền gửi.").notEmpty();
