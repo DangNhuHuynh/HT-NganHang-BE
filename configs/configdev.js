@@ -10,8 +10,8 @@ var configdev = {
         clientUrl: 'http://localhost:9527'
     },
     recaptcha: {
-        sitekey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-        secretkey: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+        sitekey: '6LcqEvwUAAAAAH5Hrsxy74qkqXlbA2TgT7FnMAbw',
+        secretkey: '6LcqEvwUAAAAANHsiUq8Ke0r4QOKzj6s1ck4m882'
     },
     db: {
         host: '127.0.0.1',

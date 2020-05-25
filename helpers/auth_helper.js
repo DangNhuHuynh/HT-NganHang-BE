@@ -1,7 +1,9 @@
 var express = require('express');
+var querystring = require('querystring')
 var auth_helper = express;
 var db = require('./../models');
 var bols = require('./../model_bols');
+var http = require('./http')
 var bcrypt = require('bcrypt');
 var ObjectId = require('mongoose').Types.ObjectId;
 
@@ -30,6 +32,22 @@ auth_helper.verify_user = async function (username, password) {
   } else {
     return null;
   }
+}
+
+auth_helper.verify_captcha = async function(token) {
+  const body = {
+    secret: config.recaptcha.secretkey,
+    response: token
+  }
+  const url = 'https://www.google.com/recaptcha/api/siteverify' + '?' + querystring.stringify(body || {})
+  const response = await http.request({
+    method: 'POST',
+    url
+  })
+
+  console.log(response)
+
+  return response && response.success
 }
 
 auth_helper.find_user_by_email = async function (email) {

@@ -7,13 +7,19 @@ var nJwt = require('njwt');
 auth.post('/login', async function (req, res) {
 	req.checkBody("username", "Vui lòng nhập tài khoản").notEmpty();
 	req.checkBody("password", "Vui lòng nhập mật khẩu").notEmpty();
+	req.checkBody("recaptcha_token", "Vui lòng nhập recaptcha token").notEmpty();
 
 	var errors = req.validationErrors();
 
 	if (errors) {
 		return res.json(errors);
 	} else {
-		var { username, password } = req.body;
+		var { username, password, recaptcha_token } = req.body;
+		var verifyReCaptcha = await helpers.auth_helper.verify_captcha(recaptcha_token);
+		if (!verifyReCaptcha) {
+      return res.status(400).json({ message: 'Verify reCaptcha không thành công.', data: req.body });
+    }
+
 		var user = await helpers.auth_helper.verify_user(username, password);
 		if (user) {
 			var tokenSecret = config.app.secretKey;
