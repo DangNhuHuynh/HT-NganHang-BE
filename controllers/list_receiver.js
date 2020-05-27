@@ -83,4 +83,47 @@ list_receiver.post('/', async function (req, res, next) {
   return res.status(200).json({message: `Tạo người nhận mới thành công.`, data: receiver.data});
 });
 
+list_receiver.put('/:receiver_id', async function (req, res, next) {
+  req.checkBody("nickname", "Vui lòng nhập tên gợi nhớ.").notEmpty();
+
+  var errors = req.validationErrors();
+  if (errors) {
+    return res.status(400).json({message: errors, data: req.body});
+  }
+
+  const receiver_id = req.params.receiver_id
+  const { nickname } = req.body
+
+  const receiver = await bols.My_model.find_first('Receiver', {
+    _id: new ObjectId(receiver_id),
+  });
+
+  if (!receiver) {
+    return res.status(400).json({message: `Người nhận không tồn tại`, data: req.body});
+  }
+
+  receiver.nickname = nickname
+  await receiver.save()
+
+  return res.status(200).json({message: `update người nhận mới thành công.`, data: receiver.data});
+});
+
+list_receiver.delete('/:receiver_id', async function (req, res, next) {
+  const receiver_id = req.params.receiver_id
+
+  const receiver = await bols.My_model.find_first('Receiver', {
+    _id: new ObjectId(receiver_id),
+  });
+
+  if (!receiver) {
+    return res.status(400).json({message: `Người nhận không tồn tại`, data: req.body});
+  }
+
+  await bols.My_model.delete('Receiver', {
+    _id: new ObjectId(receiver_id),
+  });
+
+  return res.status(200).json({message: `xoá người nhận thành công.`, data: receiver.data});
+});
+
 module.exports = list_receiver;
