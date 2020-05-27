@@ -189,7 +189,7 @@ async function verificationTransferRequest(req, user, input) {
       }
     }
 
-    const balance = await updateBalance(receiverPaymentAccount.account_number, sum_balance)
+    const balance = await updateBalance(paymentAccount.account_number, sum_balance)
     if (balance.error) {
       return {
         code: balance.error.code,

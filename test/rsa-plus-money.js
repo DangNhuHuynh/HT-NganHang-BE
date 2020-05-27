@@ -12,7 +12,7 @@ async function run() {
 
   const result = await rsaLinkApi.plusMoney(data)
 
-  // console.log(result)
+  console.log(result)
 }
 
 run()

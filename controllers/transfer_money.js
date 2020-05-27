@@ -95,6 +95,7 @@ transferMoneyRouter.post('/transfer/verification', async function (req, res, nex
   }
 
   const result = await service.verificationTransferRequest(req, user, req.body)
+console.log(result);
 
   res.status(result.code).json(result.res)
 });
