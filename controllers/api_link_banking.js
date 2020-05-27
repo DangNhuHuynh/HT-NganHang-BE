@@ -84,7 +84,7 @@ async function _transferMoney(parsedAmount, req, res) {
     await bols.My_model.delete(req, 'TransactionHistory', { _id: new ObjectId(transaction._id) })
     console.log("========LINK RESPONSE=======")
     console.log({ error: balance.error.code, message: balance.error.message, data: {} })
-    return res.status(500).json({ error: balance.error.code, message: balance.error.message, data: {} })
+    return res.status(400).json({ error: balance.error.code, message: balance.error.message, data: {} })
   }
 
   const transactionData = transaction.data
