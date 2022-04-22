@@ -31,7 +31,7 @@
     "mongoose": "^5.5.12",
     "morgan": "^1.9.1",
     "multer": "^1.3.0",
-    "nconf": "^0.10.0",
+    "nconf": "^0.11.4",
     "njwt": "^1.0.0",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0",
